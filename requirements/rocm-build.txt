@@ -1,16 +1,18 @@
 # Common dependencies
 -r common.txt
 
---extra-index-url https://download.pytorch.org/whl/test/rocm7.0
-torch==2.10.0
-torchvision==0.25.0
-torchaudio==2.10.0
-triton==3.6.0
+# ROCm 7.2 wheels - these are overridden by [tool.uv.sources] in pyproject.toml
+# when using uv. For pip, use: pip install -r rocm-build.txt --extra-index-url https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/
+torch==2.9.1
+torchvision==0.24.0
+torchaudio==2.9.1
+
+triton==3.5.1
 cmake>=3.26.1,<4
 packaging>=24.2
 setuptools>=77.0.3,<80.0.0
 setuptools-scm>=8
 wheel
 jinja2>=3.1.6
-amdsmi==6.4.3
+amdsmi
 timm>=1.0.17
