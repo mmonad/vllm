@@ -1250,6 +1250,16 @@ def _run_in_subprocess(fn: Callable[[], _T]) -> _T:
             _SUBPROCESS_COMMAND, input=input_bytes, capture_output=True
         )
 
+        # Check if output file exists and is valid before checking return code.
+        # This handles cases where the subprocess crashes during cleanup (e.g.,
+        # ROCm roctracer assertion failure on RDNA4) after writing valid results.
+        if os.path.exists(output_filepath):
+            try:
+                with open(output_filepath, "rb") as f:
+                    return pickle.load(f)
+            except Exception:
+                pass  # Fall through to check return code
+
         # check if the subprocess is successful
         try:
             returned.check_returncode()
