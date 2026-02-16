@@ -1,0 +1,27 @@
+# Qwen3-30B Thinking (AWQ) — reasoning model
+# Usage: ./run-vllm.sh configs/qwen3-think-30b-a3b-awq.yaml
+# Note: AWQ requires float16; the model config has bfloat16
+
+model: QuantTrio/Qwen3-30B-A3B-Thinking-2507-AWQ
+served-model-name: Qwen3-30B-Thinking
+#max-model-len: 262144
+max-model-len: 32768
+max-num-seqs: 512
+gpu-memory-utilization: 0.95
+quantization: awq
+dtype: float16
+swap-space: 16
+tensor-parallel-size: 1
+trust-remote-code: true
+enable-expert-parallel: true
+enable-reasoning: true
+reasoning-parser: deepseek_r1
+override-generation-config:
+  temperature: 0.6
+  top_p: 0.95
+  top_k: 20
+  min_p: 0.0
+enable-auto-tool-choice: true
+tool-call-parser: qwen3_xml
+host: "0.0.0.0"
+port: 8080

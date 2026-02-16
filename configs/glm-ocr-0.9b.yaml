@@ -1,0 +1,19 @@
+# GLM-OCR (0.9B) — lightweight OCR model
+# Usage: ./run-vllm.sh configs/glm-ocr-0.9b.yaml
+
+model: zai-org/GLM-OCR
+served-model-name: GLM-OCR
+max-model-len: 8192
+max-num-seqs: 256
+max-num-batched-tokens: 6144
+gpu-memory-utilization: 0.95
+swap-space: 4
+tensor-parallel-size: 1
+trust-remote-code: true
+enable-auto-tool-choice: true
+tool-call-parser: glm47
+allowed-local-media-path: /
+limit-mm-per-prompt:
+  image: 6144
+host: "0.0.0.0"
+port: 8080

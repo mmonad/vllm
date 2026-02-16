@@ -1,0 +1,24 @@
+# Voxtral Mini 4B Realtime — streaming speech-to-text via /v1/realtime
+# Usage: ./run-vllm.sh configs/voxtral-4b-realtime.yaml
+#
+# WebSocket endpoint: ws://HOST:PORT/v1/realtime
+# VRAM: ~16GB (bf16)
+# Delay: 480ms (default in tekken.json, configurable 80ms-2.4s)
+# 1 text token = 80ms of audio; default max-model-len=131072 (~2h55m)
+
+model: mistralai/Voxtral-Mini-4B-Realtime-2602
+served-model-name: Voxtral-Realtime
+tokenizer-mode: mistral
+config-format: mistral
+load-format: mistral
+max-num-seqs: 64
+gpu-memory-utilization: 0.95
+swap-space: 4
+tensor-parallel-size: 1
+trust-remote-code: true
+override-generation-config:
+  temperature: 0.0
+host: "0.0.0.0"
+port: 8080
+compilation-config:
+  cudagraph_mode: PIECEWISE

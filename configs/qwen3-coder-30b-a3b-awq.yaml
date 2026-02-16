@@ -1,0 +1,23 @@
+# Qwen3-Coder-30B (AWQ 8-bit) — coding model
+# Usage: ./run-vllm.sh configs/qwen3-coder-30b-a3b-awq.yaml
+
+model: cyankiwi/Qwen3-Coder-30B-A3B-Instruct-AWQ-4bit
+served-model-name: Qwen3-Coder-30B
+#max-model-len: 262144
+max-model-len: 96000
+max-num-seqs: 8
+gpu-memory-utilization: 0.95
+quantization: compressed-tensors
+dtype: float16
+swap-space: 4
+tensor-parallel-size: 1
+trust-remote-code: true
+override-generation-config:
+  temperature: 0.7
+  top_p: 0.8
+  top_k: 20
+  repetition_penalty: 1.05
+enable-auto-tool-choice: true
+tool-call-parser: qwen3_xml
+host: "0.0.0.0"
+port: 8080

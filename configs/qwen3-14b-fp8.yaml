@@ -1,0 +1,27 @@
+# Qwen3-14B (FP8) — tool-calling & automation model
+# Usage: ./run-vllm.sh configs/qwen3-14b-fp8.yaml
+# Hardware: 32GB RDNA4 (gfx12) — FP8 is hardware-accelerated
+# Alt model: RedHatAI/Qwen3-14B-FP8-dynamic (compressed-tensors, 100.3% bench recovery)
+
+model: Qwen/Qwen3-14B-FP8
+served-model-name: Qwen3-14B
+#max-model-len: 40960
+max-model-len: 32768
+max-num-seqs: 16
+gpu-memory-utilization: 0.95
+# No quantization: flag needed — vLLM auto-detects FP8 from model config
+dtype: bfloat16
+kv-cache-dtype: fp8_e4m3
+swap-space: 8
+tensor-parallel-size: 1
+trust-remote-code: true
+reasoning-parser: deepseek_r1
+override-generation-config:
+  temperature: 0.6
+  top_p: 0.95
+  top_k: 20
+  min_p: 0.0
+enable-auto-tool-choice: true
+tool-call-parser: hermes
+host: "0.0.0.0"
+port: 8080

@@ -1,0 +1,16 @@
+# Qwen3-VL-30B (AWQ) — default model preset
+# Usage: ./run-vllm.sh configs/qwen3-vl-30b-a3b-awq.yaml
+
+model: QuantTrio/Qwen3-VL-30B-A3B-Instruct-AWQ
+served-model-name: Qwen3-VL-30B
+max-model-len: 32768
+max-num-seqs: 256
+gpu-memory-utilization: 0.95
+quantization: awq
+swap-space: 4
+tensor-parallel-size: 1
+trust-remote-code: true
+enable-auto-tool-choice: true
+tool-call-parser: qwen3_xml
+host: "0.0.0.0"
+port: 8080

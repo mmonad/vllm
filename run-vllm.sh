@@ -1,17 +1,20 @@
 #!/bin/bash
 # vLLM ROCm launch script for AMD Radeon AI PRO R9700 (gfx1201/RDNA4)
-# Optimized based on: https://rocm.docs.amd.com/en/latest/how-to/rocm-for-ai/inference-optimization/vllm-optimization.html
+#
+# Model configuration now lives in YAML config files under configs/.
+# This script only sets ROCm/RDNA4 environment variables and delegates to vllm serve.
+#
+# Usage:
+#   ./run-vllm.sh configs/qwen3-14b-fp8.yaml              # tool-calling (FP8)
+#   ./run-vllm.sh configs/qwen3-coder-30b-a3b-awq.yaml   # coding model
+#   ./run-vllm.sh configs/qwen3-think-30b-a3b-awq.yaml   # reasoning model
+#   ./run-vllm.sh configs/qwen3-vl-30b-a3b-awq.yaml      # vision model
+#   ./run-vllm.sh configs/glm-ocr-0.9b.yaml              # OCR model
+#   ./run-vllm.sh configs/voxtral-3b-batch.yaml           # batch transcription
+#   ./run-vllm.sh configs/voxtral-4b-realtime.yaml        # streaming STT
 
-# Configuration - edit these as needed
-MODEL="${MODEL:-QuantTrio/Qwen3-VL-30B-A3B-Instruct-AWQ}"
-SERVED_NAME="${SERVED_NAME:-My_Model}"
-MAX_MODEL_LEN="${MAX_MODEL_LEN:-32768}"
-MAX_NUM_SEQS="${MAX_NUM_SEQS:-256}"        # Increased from 8 for better throughput
-GPU_MEM_UTIL="${GPU_MEM_UTIL:-0.95}"       # Increased from 0.9 to maximize KV-cache
-SWAP_SPACE="${SWAP_SPACE:-4}"
-TP_SIZE="${TP_SIZE:-1}"
-HOST="${HOST:-0.0.0.0}"
-PORT="${PORT:-8000}"
+CONFIG="${1:?Usage: $0 <config.yaml> [extra vllm args...]}"
+shift
 
 # =============================================================================
 # ROCm Environment Variables (RDNA4/gfx1201 optimized)
@@ -38,36 +41,14 @@ export VLLM_ROCM_USE_AITER="0"
 # Prefer hipBLASLt for GEMM operations (if available)
 export TORCH_BLAS_PREFER_HIPBLASLT=1
 
-# =============================================================================
-# Script setup
-# =============================================================================
-
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/.venv/bin/activate"
-
-echo "Starting vLLM server (RDNA4 optimized)..."
-echo "  Model: $MODEL"
-echo "  GPU: $HIP_VISIBLE_DEVICES"
-echo "  Context: $MAX_MODEL_LEN tokens"
-echo "  Max sequences: $MAX_NUM_SEQS"
-echo "  GPU memory: ${GPU_MEM_UTIL}%"
-echo "  Port: $PORT"
-echo ""
+# Triton JIT kernels aren't serializable by torch.compile's cache on ROCm
+export VLLM_DISABLE_COMPILE_CACHE=1
 
 # =============================================================================
 # Launch vLLM
 # =============================================================================
 
-exec vllm serve "$MODEL" \
-    --served-model-name "$SERVED_NAME" \
-    --swap-space "$SWAP_SPACE" \
-    --max-num-seqs "$MAX_NUM_SEQS" \
-    --max-model-len "$MAX_MODEL_LEN" \
-    --gpu-memory-utilization "$GPU_MEM_UTIL" \
-    --tensor-parallel-size "$TP_SIZE" \
-    --quantization awq \
-    --trust-remote-code \
-    --disable-log-requests \
-    --host "$HOST" \
-    --port "$PORT" \
-    "$@"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/.venv/bin/activate"
+
+exec vllm serve --config "$CONFIG" "$@"

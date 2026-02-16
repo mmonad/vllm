@@ -1,0 +1,22 @@
+# Voxtral Mini 3B — batch speech transcription via /v1/audio/transcriptions
+# Usage: ./run-vllm.sh configs/voxtral-3b-batch.yaml
+#
+# VRAM: ~9.5GB (bf16), handles up to 30min audio
+# Transcription: temperature=0.0
+# Understanding: temperature=0.2, top_p=0.95
+
+model: mistralai/Voxtral-Mini-3B-2507
+served-model-name: Voxtral-Mini-3B
+tokenizer-mode: mistral
+config-format: mistral
+load-format: mistral
+max-model-len: 32768
+max-num-seqs: 64
+gpu-memory-utilization: 0.95
+swap-space: 4
+tensor-parallel-size: 1
+trust-remote-code: true
+override-generation-config:
+  temperature: 0.0
+host: "0.0.0.0"
+port: 8080

@@ -40,9 +40,10 @@ dependencies = [
     "torch==2.9.1",
     "torchvision==0.24.0",
     "triton==3.5.1",
+    "flash-attn",  # Stub for RDNA4 (use Triton backend)
 
     # Core ML/inference
-    "transformers>=4.56.0,<5",
+    "transformers @ git+https://github.com/huggingface/transformers.git",
     "tokenizers>=0.21.1",
     "accelerate",
     "peft",
@@ -115,7 +116,7 @@ dependencies = [
     "six>=1.16.0",
 
     # Mistral
-    "mistral_common[image]>=1.9.0",
+    "mistral_common[image,soundfile]>=1.9.0",
 
     # Model hosting
     "model-hosting-container-standards>=0.1.13,<1.0.0",
@@ -422,3 +423,4 @@ override-dependencies = [
 torch = { url = "https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/torch-2.9.1%2Brocm7.2.0.lw.git7e1940d4-cp313-cp313-linux_x86_64.whl" }
 torchvision = { url = "https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/torchvision-0.24.0%2Brocm7.2.0.gitb919bd0c-cp313-cp313-linux_x86_64.whl" }
 triton = { url = "https://repo.radeon.com/rocm/manylinux/rocm-rel-7.2/triton-3.5.1%2Brocm7.2.0.gita272dfa8-cp313-cp313-linux_x86_64.whl" }
+flash-attn = { path = "../flash-attention", editable = true }

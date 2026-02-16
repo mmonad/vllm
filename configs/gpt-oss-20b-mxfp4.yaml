@@ -1,0 +1,26 @@
+# GPT-OSS-20B (MXFP4) — OpenAI open-weight MoE model
+# Usage: ./run-vllm.sh configs/gpt-oss-20b-mxfp4.yaml
+# Hardware: 16GB+ VRAM — 21B total params, 3.6B active (MoE), MXFP4 quantized
+# Ref: https://docs.vllm.ai/projects/recipes/en/latest/OpenAI/GPT-OSS.html
+# Note: Requires vllm >= 0.10.2 (0.12+ recommended)
+#   uv pip install vllm==0.10.2 --torch-backend=auto
+#
+# RDNA4 (gfx12): Uses custom Triton MXFP4 dequant kernel (no tl.dot_scaled)
+# Weights stay packed as FP4 in VRAM (~10.5GB), dequantized per-tile to BF16
+
+model: openai/gpt-oss-20b
+served-model-name: GPT-OSS-20B
+max-model-len: 32768
+max-num-seqs: 64
+max-num-batched-tokens: 8192
+gpu-memory-utilization: 0.95
+dtype: bfloat16
+swap-space: 4
+tensor-parallel-size: 1
+trust-remote-code: true
+async-scheduling: true
+enable-auto-tool-choice: true
+tool-call-parser: openai
+reasoning-parser: openai_gptoss
+host: "0.0.0.0"
+port: 8080
