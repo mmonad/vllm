@@ -10,6 +10,7 @@ max-num-seqs: 512
 gpu-memory-utilization: 0.95
 quantization: awq
 dtype: float16
+kv-cache-dtype: fp8
 swap-space: 16
 tensor-parallel-size: 1
 trust-remote-code: true

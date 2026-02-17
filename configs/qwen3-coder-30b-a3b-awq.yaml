@@ -1,4 +1,4 @@
-# Qwen3-Coder-30B (AWQ 8-bit) — coding model
+# Qwen3-Coder-30B (AWQ 4-bit) — coding model
 # Usage: ./run-vllm.sh configs/qwen3-coder-30b-a3b-awq.yaml
 
 model: cyankiwi/Qwen3-Coder-30B-A3B-Instruct-AWQ-4bit
@@ -9,6 +9,7 @@ max-num-seqs: 8
 gpu-memory-utilization: 0.95
 quantization: compressed-tensors
 dtype: float16
+kv-cache-dtype: fp8
 swap-space: 4
 tensor-parallel-size: 1
 trust-remote-code: true

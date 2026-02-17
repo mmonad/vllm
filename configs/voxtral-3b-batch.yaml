@@ -13,6 +13,7 @@ load-format: mistral
 max-model-len: 32768
 max-num-seqs: 64
 gpu-memory-utilization: 0.95
+kv-cache-dtype: fp8
 swap-space: 4
 tensor-parallel-size: 1
 trust-remote-code: true
