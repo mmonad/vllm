@@ -1,0 +1,17 @@
+# GPT-OSS-20B (MXFP4) — OpenAI open-weight MoE model
+# Usage: ./run-vllm.sh configs/cuda/gpt-oss-20b-mxfp4.yaml
+# Hardware: RTX Pro 6000 (96GB) — 21B total params, 3.6B active (MoE), MXFP4
+# Ref: https://docs.vllm.ai/projects/recipes/en/latest/OpenAI/GPT-OSS.html
+
+model: openai/gpt-oss-20b
+served-model-name: openai/gpt-oss-20b
+max-model-len: 131072
+gpu-memory-utilization: 0.49
+dtype: bfloat16
+kv-cache-dtype: fp8
+tensor-parallel-size: 1
+trust-remote-code: true
+async-scheduling: true
+enable-auto-tool-choice: true
+tool-call-parser: openai
+reasoning-parser: openai_gptoss

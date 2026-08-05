@@ -1,0 +1,6 @@
+# Qwen3.5-35B-A3B (MLX 8-bit) — remote benchmark config for mlx-lm on MBP
+# Usage: BENCH_HOST=mbp ./bench-vllm.sh configs/qwen3.5-35b-a3b-8bit-mlx.yaml
+
+model: mlx-community/Qwen3.5-35B-A3B-8bit
+served-model-name: mlx-community/Qwen3.5-35B-A3B-8bit
+trust-remote-code: true

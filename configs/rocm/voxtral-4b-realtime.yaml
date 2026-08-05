@@ -1,0 +1,51 @@
+# Voxtral Mini 4B Realtime — streaming speech-to-text via /v1/realtime
+# Usage: ./run-vllm.sh configs/rocm/voxtral-4b-realtime.yaml
+#
+# WebSocket endpoint: ws://HOST:PORT/v1/realtime
+# Hardware: 1× 32GB RDNA4 (gfx1201, R9700) — ~8 GiB bf16 weights + audio
+#   encoder/activations.  At max-model-len=131072 with FP8 KV-cache, KV per
+#   sequence is the dominant resident cost and the gpu-memory-utilization
+#   ceiling decides how many concurrent realtime sessions fit.
+# Delay: 480ms (default in tekken.json, configurable 80ms-2.4s)
+# 1 text token = 80ms of audio; default max-model-len=131072 (~2h55m)
+#
+# Differences vs configs/cuda/voxtral-4b-realtime.yaml:
+#   - dtype: bfloat16 — explicit for ROCm (Triton attention kernels assume it)
+#   - gpu-memory-utilization 0.4 → 0.75 — the 96GB RTX Pro 6000 had room to
+#     leave 60GB unused; on 32GB R9700 we keep ~25% headroom for the audio
+#     encoder + activations and let the rest fund KV-cache for concurrent
+#     streams.  Bump toward 0.95 if you need more concurrent sessions and
+#     have verified no other GPU consumers on the card.
+#   - cudagraph_mode=PIECEWISE — same value, but on ROCm this captures HIP
+#     graphs.  PIECEWISE (not FULL) because realtime's per-step buffer logic
+#     in voxtral_realtime.py has data-dependent control flow that defeats a
+#     monolithic graph.  Re-enabled on RDNA4 after PRs #38086/#38455 (Apr
+#     2026) fixed the page-fault-after-Dynamo class of bugs; if crashes
+#     return, fall back to `enforce-eager: true`.
+#   - host/port pinned to 127.0.0.1:8088 — realtime audio sessions hold long
+#     WebSocket connections, so we bind loopback-only and use a non-default
+#     port to avoid colliding with the script's 0.0.0.0:8080 default that
+#     other configs rely on.  run-vllm.sh detects these YAML keys and
+#     suppresses its --host/--port defaults so the YAML wins.
+#
+# All gfx1201-critical env vars (FLASH_ATTENTION_TRITON_AMD_ENABLE=TRUE,
+# VLLM_ROCM_USE_AITER=0, NCCL_PROTO=Simple, VLLM_ROCM_FP8_PADDING=0) are set
+# by run-vllm.sh's setup_rocm() — no need to repeat them here.
+
+model: mistralai/Voxtral-Mini-4B-Realtime-2602
+served-model-name: mistralai/Voxtral-Mini-4B-Realtime-2602
+host: 127.0.0.1
+port: 8088
+tokenizer-mode: mistral
+config-format: mistral
+load-format: mistral
+max-num-seqs: 64
+gpu-memory-utilization: 0.75
+dtype: bfloat16
+kv-cache-dtype: fp8
+tensor-parallel-size: 1
+trust-remote-code: true
+override-generation-config:
+  temperature: 0.0
+compilation-config:
+  cudagraph_mode: PIECEWISE

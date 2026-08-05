@@ -1,0 +1,65 @@
+# Gemma-4-31B-IT (FP8-block) — multimodal Gemma 4 (text + image + video)
+# Usage: ./run-vllm.sh configs/rocm/gemma-4-31b-it-fp8.yaml
+# Hardware: 2× 32GB RDNA4 (gfx1201) — FP8 weights + FP8 KV-cache
+#
+# Topology: tensor-parallel-size=2 divides cleanly on every axis:
+#   32 attention heads / 2 = 16, 16 sliding KV heads / 2 = 8,
+#   4 global KV heads / 2 = 2. TP=3 or TP=4 would fail on the 4 global KV heads.
+#
+# Context: layer_types are 5× sliding_attention + 1× full_attention repeated 10×.
+#   Only 10 of 60 layers hold a growing KV cache; the 50 sliding layers stay
+#   bounded at sliding_window=1024 tokens regardless of max-model-len.
+#   Per-GPU KV at native 262144 tokens, FP8, TP=2:
+#     full:    10 × 2 KV heads × 512 head_dim × 2 (K+V) × 262144 ≈ 5.0 GB / seq
+#     sliding: 50 × 8 KV heads × 256 head_dim × 2 (K+V) × 1024   ≈ 0.2 GB / seq
+#   Per-GPU budget: ~16 GB FP8 weights + ~1.5 GB BF16 lm_head + ~1 GB vision
+#   ≈ ~13 GB headroom for KV/activations → ~2 full-context multimodal seqs.
+#
+# Vision caveat: vision_config.max_position_embeddings=131072 (128K). At the
+#   full 256K context, image tokens placed beyond position 131072 fall outside
+#   the vision tower's RoPE table. Keep images in the first half of long
+#   contexts; for image-heavy workloads near the limit, drop max-model-len to
+#   131072 (matches CUDA NVFP4 config default).
+#
+# FP8: quant_method=compressed-tensors with FP8_BLOCK config_group (128×128
+#   blockwise, same kernel path as Qwen3.6's quant_method=fp8). Vision tower,
+#   lm_head, and embed_tokens stay BF16 per the checkpoint's `ignore` list.
+#   run-vllm.sh exports VLLM_ROCM_FP8_PADDING=0 to skip the F.pad() weight copy
+#   during post-processing that OOMs on ROCm (no expandable_segments on HIP).
+#
+# attention_k_eq_v=true: Gemma 4 ties K and V projection weights (~⅓ attn weight
+#   savings) but K and V still materialise separately at runtime — no KV-cache
+#   shrink, only weight-memory savings already reflected in the FP8 totals above.
+#
+# Speculative decoding: not enabled on this hardware. The RedHatAI dflash
+#   speculator (gemma-4-31B-it-speculator.dflash) cannot run on RDNA4 because
+#   vLLM forces use_non_causal=True engine-wide whenever method=="dflash"
+#   (selector.py:82-84) — and no ROCm attention backend on gfx1201 supports
+#   the combination of non-causal attention + head_size=512 (Gemma 4's
+#   global_head_dim on full-attention layers):
+#     FLASH_ATTN:      head_size=512 needs FA4 (Hopper-only) and rejects fp8 KV
+#     TRITON_ATTN:     supports_non_causal=False
+#     ROCM_ATTN:       supported head sizes capped at 256
+#     ROCM_AITER_FA:   gfx9-only (and needs aiter installed)
+#   Gemma 4 also has no MTP layers in the checkpoint, so the qwen3.6-style
+#   speculative-config: '{"method":"mtp",...}' isn't an option either.
+
+model: RedHatAI/gemma-4-31B-it-FP8-block
+served-model-name: RedHatAI/gemma-4-31B-it-FP8-block
+max-model-len: 262144
+max-num-seqs: 2
+max-num-batched-tokens: 8192
+gpu-memory-utilization: 0.95
+# No quantization flag — vLLM auto-detects FP8_BLOCK from quantization_config
+dtype: bfloat16
+kv-cache-dtype: fp8
+tensor-parallel-size: 2
+trust-remote-code: true
+enforce-eager: false  # re-enabled on RDNA4 — the page-fault-after-Dynamo class of bugs has fixes landed on main (PR #38086, #38455, Apr 2026); revert to true if crashes return
+enable-chunked-prefill: true
+limit-mm-per-prompt:
+  image: 4
+  video: 1
+reasoning-parser: gemma4
+tool-call-parser: gemma4
+enable-auto-tool-choice: true

@@ -1,0 +1,29 @@
+# Gemma-4-31B-IT (NVFP4) — NVIDIA-quantized multimodal Gemma 4 (text + image + video)
+# Usage: ./run-vllm.sh configs/cuda/gemma-4-31b-it-nvfp4.yaml
+# Hardware: RTX Pro 6000 (96GB Blackwell sm_120) — single GPU
+# Ref: https://huggingface.co/nvidia/Gemma-4-31B-IT-NVFP4
+#
+# Notes:
+#   * HF config declares quant_algo=NVFP4; passing `quantization: modelopt` lets
+#     vLLM's override_quantization_method auto-route to modelopt_fp4.
+#   * 30.7B params @ NVFP4 ≈ ~15GB weights; vision tower + lm_head stay BF16.
+#   * Text context window is 256K but the vision tower is capped at 128K, so we
+#     default to 131072.  Bump to 262144 for text-only workloads.
+
+model: nvidia/Gemma-4-31B-IT-NVFP4
+served-model-name: nvidia/Gemma-4-31B-IT-NVFP4
+quantization: modelopt
+max-model-len: 131072
+max-num-seqs: 6
+gpu-memory-utilization: 0.9
+dtype: bfloat16
+kv-cache-dtype: fp8
+tensor-parallel-size: 1
+trust-remote-code: true
+async-scheduling: true
+limit-mm-per-prompt:
+  image: 4
+  video: 1
+enable-auto-tool-choice: true
+tool-call-parser: gemma4
+reasoning-parser: gemma4

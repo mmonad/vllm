@@ -1,0 +1,49 @@
+# Qwen3.6-35B-A3B (FP8) — hybrid linear/full-attention MoE, 3B active, multimodal
+# Usage: ./run-vllm.sh configs/rocm/qwen3.6-35b-a3b-fp8.yaml
+# Hardware: 3× 32GB RDNA4 (gfx1201) — FP8 weights + FP8 KV-cache, 1M context via YARN
+#
+# Topology: pipeline-parallel-size=3 (NOT tensor-parallel).
+#   num_attention_heads=16, num_key_value_heads=2, num_experts=256 — none are
+#   divisible by 3, so TP=3 fails vLLM's sharding checks. PP splits the 40
+#   decoder layers across GPUs (~14/13/13) without touching head/expert counts.
+#
+# Context: architecture is 3× linear_attention + 1× full_attention repeated 10×
+#   (full_attention_interval=4). Only 10 of 40 layers hold a growing KV cache,
+#   so 1M tokens at FP8 KV is ~2.7GB per sequence — fits comfortably on RDNA4.
+#   Native max_position_embeddings=262144; YARN factor=4 extends to 1,048,576.
+#
+# FP8: quant_method=fp8 with weight_block_size=[128,128] (DeepSeek-style blockwise).
+#   run-vllm.sh exports VLLM_ROCM_FP8_PADDING=0 to skip the F.pad() weight copy
+#   during post-processing that OOMs on ROCm (no expandable_segments on HIP).
+#
+# Multimodal: base checkpoint ships a vision tower (Qwen3_5MoeForConditionalGeneration).
+#   language-model-only=true skips loading it, saving VRAM for KV/activations.
+
+model: Qwen/Qwen3.6-35B-A3B-FP8
+served-model-name: Qwen3.6-35B-A3B-FP8
+max-model-len: 1048576
+max-num-seqs: 1
+max-num-batched-tokens: 8192
+gpu-memory-utilization: 0.95
+# No quantization flag — vLLM auto-detects FP8 from quantization_config
+dtype: bfloat16
+kv-cache-dtype: fp8
+tensor-parallel-size: 1
+pipeline-parallel-size: 3
+trust-remote-code: true
+enforce-eager: false  # re-enabled on RDNA4 — the page-fault-after-Dynamo class of bugs has fixes landed on main (PR #38086, #38455, Apr 2026); revert to true if crashes return
+language-model-only: true
+enable-chunked-prefill: true
+rope-scaling: '{"rope_type":"yarn","factor":4.0,"original_max_position_embeddings":262144}'
+reasoning-parser: qwen3
+# Qwen3 thinking-mode sampling defaults for general tasks
+override-generation-config:
+  temperature: 1.0
+  top_p: 0.95
+  top_k: 20
+  min_p: 0.0
+  presence_penalty: 0.0
+  repetition_penalty: 1.0
+enable-auto-tool-choice: true
+tool-call-parser: qwen3_coder
+speculative-config: '{"method":"mtp","num_speculative_tokens":2}'

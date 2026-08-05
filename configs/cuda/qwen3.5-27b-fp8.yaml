@@ -1,0 +1,22 @@
+# Qwen3.5-27B (FP8) — hybrid DeltaNet+Attention dense model
+# Usage: ./run-vllm.sh configs/cuda/qwen3.5-27b-fp8.yaml
+# Hardware: RTX Pro 6000 (96GB) — FP8 weights + FP8 KV-cache
+
+model: Qwen/Qwen3.5-27B-FP8
+served-model-name: Qwen/Qwen3.5-27B-FP8
+max-model-len: 262144
+gpu-memory-utilization: 0.9
+dtype: bfloat16
+kv-cache-dtype: fp8
+tensor-parallel-size: 1
+trust-remote-code: true
+language-model-only: true
+reasoning-parser: qwen3
+override-generation-config:
+  temperature: 0.6
+  top_p: 0.95
+  top_k: 20
+  min_p: 0.0
+enable-auto-tool-choice: true
+tool-call-parser: qwen3_coder
+speculative-config: '{"method":"mtp","num_speculative_tokens":2}'

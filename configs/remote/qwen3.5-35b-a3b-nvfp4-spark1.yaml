@@ -1,0 +1,12 @@
+# Qwen3.5-35B-A3B (NVFP4) — remote server on spark1
+# Benchmarking config only — server launched externally
+#
+# Usage:
+#   ./bench-vllm.sh configs/qwen3.5-35b-a3b-nvfp4-spark1.yaml
+
+model: Kbenkhaled/Qwen3.5-35B-A3B-NVFP4
+served-model-name: Kbenkhaled/Qwen3.5-35B-A3B-NVFP4
+host: spark1
+port: 8888
+endpoint: /v1/chat/completions
+trust-remote-code: true

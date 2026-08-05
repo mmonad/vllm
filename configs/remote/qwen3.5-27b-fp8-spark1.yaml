@@ -1,0 +1,12 @@
+# Qwen3.5-27B (FP8) — remote server on spark1
+# Benchmarking config only — server launched externally with:
+#   vllm serve Qwen/Qwen3.5-27B-FP8 --port 8080 --max-model-len 262144 \
+#     --reasoning-parser qwen3
+
+model: Qwen/Qwen3.5-27B-FP8
+served-model-name: Qwen/Qwen3.5-27B-FP8
+host: spark1
+port: 8080
+max-model-len: 262144
+trust-remote-code: true
+reasoning-parser: qwen3

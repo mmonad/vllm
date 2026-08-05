@@ -1,0 +1,26 @@
+# Qwen3.5-27B (AWQ 4-bit) — hybrid DeltaNet+Attention dense model
+# Usage: ./run-vllm.sh configs/qwen3.5-27b-awq.yaml
+# Note: AWQ requires float16; thinking mode is on by default
+
+model: cyankiwi/Qwen3.5-27B-AWQ-4bit
+served-model-name: cyankiwi/Qwen3.5-27B-AWQ-4bit
+# max-model-len: 262144
+max-model-len: 16384
+max-num-seqs: 1
+gpu-memory-utilization: 0.99
+quantization: compressed-tensors
+dtype: float16
+kv-cache-dtype: fp8
+tensor-parallel-size: 1
+trust-remote-code: true
+enforce-eager: true
+language-model-only: true
+reasoning-parser: qwen3
+override-generation-config:
+  temperature: 0.6
+  top_p: 0.95
+  top_k: 20
+  min_p: 0.0
+enable-auto-tool-choice: true
+tool-call-parser: qwen3_coder
+speculative-config: '{"method":"mtp","num_speculative_tokens":2}'
