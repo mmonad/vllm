@@ -271,20 +271,22 @@ async def async_request_openai_completions(
 def _get_chat_content(
     request_func_input: RequestFuncInput,
     mm_position: Literal["first", "last"] = "last",
-) -> list[dict[str, Any]]:
-    mm_contents: list[dict[str, Any]] = []
-    if request_func_input.multi_modal_content:
-        mm_content = request_func_input.multi_modal_content
-        if isinstance(mm_content, list):
-            mm_contents.extend(mm_content)
-        elif isinstance(mm_content, dict):
-            mm_contents.append(mm_content)
-        else:
-            raise TypeError(
-                "multi_modal_content must be a dict or list[dict] for openai-chat"
-            )
-
+) -> str | list[dict[str, Any]]:
     prompt = request_func_input.prompt
+    if not request_func_input.multi_modal_content and isinstance(prompt, str):
+        return prompt
+
+    mm_contents: list[dict[str, Any]] = []
+    mm_content = request_func_input.multi_modal_content
+    if isinstance(mm_content, list):
+        mm_contents.extend(mm_content)
+    elif isinstance(mm_content, dict):
+        mm_contents.append(mm_content)
+    else:
+        raise TypeError(
+            "multi_modal_content must be a dict or list[dict] for openai-chat"
+        )
+
     if (
         isinstance(prompt, list)
         and prompt
