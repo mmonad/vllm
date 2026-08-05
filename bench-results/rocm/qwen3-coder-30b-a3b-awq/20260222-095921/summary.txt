@@ -1,0 +1,68 @@
+================================================================
+vLLM Benchmark Results
+================================================================
+Config:    configs/qwen3-coder-30b-a3b-awq.yaml
+Name:      qwen3-coder-30b-a3b-awq
+Date:      2026-02-22T09:59:21+00:00
+Git SHA:   05a0d1458
+Server:    http://127.0.0.1:8080
+Model:     Qwen3-Coder-30B
+GPU:       		AMD Radeon AI PRO R9700
+ROCm:      7.2.0
+================================================================
+
+================ BENCHMARKS ========================
+
+--- in=128 out=128 n=50 ---
+  Command: vllm bench serve --backend openai --base-url http://127.0.0.1:8080 --model Qwen3-Coder-30B --endpoint /v1/completions --tokenizer cyankiwi/Qwen3-Coder-30B-A3B-Instruct-AWQ-4bit --save-result --result-dir /home/bren/Code/vllm/bench-results/qwen3-coder-30b-a3b-awq/20260222-095921 --result-filename serve_in128_out128_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 128 --output-len 128 --num-prompts 50 --request-rate inf --ignore-eos --dataset-name random --input-len 128 --output-len 128 --num-prompts 50 --request-rate inf --ignore-eos
+  Throughput:  1.29 req/s | 164.9 out tok/s | 329.8 total tok/s
+  Prefill:     mean 17397.1 ms | P50 19456.5 ms | P99 36134.1 ms
+  Decode:      mean 35.8 ms/tok | P50 37.0 ms | P99 48.9 ms
+  E2E:         mean 21947.7 ms | P50 24288.5 ms | P99 38802.9 ms
+  Completed:   50 requests in 38.8s
+
+--- in=128 out=512 n=50 ---
+  Command: vllm bench serve --backend openai --base-url http://127.0.0.1:8080 --model Qwen3-Coder-30B --endpoint /v1/completions --tokenizer cyankiwi/Qwen3-Coder-30B-A3B-Instruct-AWQ-4bit --save-result --result-dir /home/bren/Code/vllm/bench-results/qwen3-coder-30b-a3b-awq/20260222-095921 --result-filename serve_in128_out512_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 128 --output-len 512 --num-prompts 50 --request-rate inf --ignore-eos --dataset-name random --input-len 128 --output-len 512 --num-prompts 50 --request-rate inf --ignore-eos
+  Throughput:  0.42 req/s | 214.7 out tok/s | 268.4 total tok/s
+  Prefill:     mean 47197.7 ms | P50 52549.8 ms | P99 108553.1 ms
+  Decode:      mean 34.5 ms/tok | P50 35.2 ms | P99 38.0 ms
+  E2E:         mean 64808.5 ms | P50 70856.1 ms | P99 119216.5 ms
+  Completed:   50 requests in 119.2s
+
+--- in=512 out=128 n=50 ---
+  Command: vllm bench serve --backend openai --base-url http://127.0.0.1:8080 --model Qwen3-Coder-30B --endpoint /v1/completions --tokenizer cyankiwi/Qwen3-Coder-30B-A3B-Instruct-AWQ-4bit --save-result --result-dir /home/bren/Code/vllm/bench-results/qwen3-coder-30b-a3b-awq/20260222-095921 --result-filename serve_in512_out128_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 512 --output-len 128 --num-prompts 50 --request-rate inf --ignore-eos --dataset-name random --input-len 512 --output-len 128 --num-prompts 50 --request-rate inf --ignore-eos
+  Throughput:  0.59 req/s | 75.0 out tok/s | 375.1 total tok/s
+  Prefill:     mean 41825.7 ms | P50 41148.1 ms | P99 82570.3 ms
+  Decode:      mean 52.1 ms/tok | P50 41.3 ms | P99 101.7 ms
+  E2E:         mean 48438.1 ms | P50 53254.9 ms | P99 85304.6 ms
+  Completed:   50 requests in 85.3s
+
+--- in=512 out=512 n=50 ---
+  Command: vllm bench serve --backend openai --base-url http://127.0.0.1:8080 --model Qwen3-Coder-30B --endpoint /v1/completions --tokenizer cyankiwi/Qwen3-Coder-30B-A3B-Instruct-AWQ-4bit --save-result --result-dir /home/bren/Code/vllm/bench-results/qwen3-coder-30b-a3b-awq/20260222-095921 --result-filename serve_in512_out512_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 512 --output-len 512 --num-prompts 50 --request-rate inf --ignore-eos --dataset-name random --input-len 512 --output-len 512 --num-prompts 50 --request-rate inf --ignore-eos
+  Throughput:  0.43 req/s | 218.2 out tok/s | 436.4 total tok/s
+  Prefill:     mean 47357.3 ms | P50 54139.0 ms | P99 106820.6 ms
+  Decode:      mean 33.9 ms/tok | P50 33.7 ms | P99 37.9 ms
+  E2E:         mean 64663.6 ms | P50 72328.9 ms | P99 117309.2 ms
+  Completed:   50 requests in 117.3s
+
+--- in=2048 out=128 n=50 ---
+  Command: vllm bench serve --backend openai --base-url http://127.0.0.1:8080 --model Qwen3-Coder-30B --endpoint /v1/completions --tokenizer cyankiwi/Qwen3-Coder-30B-A3B-Instruct-AWQ-4bit --save-result --result-dir /home/bren/Code/vllm/bench-results/qwen3-coder-30b-a3b-awq/20260222-095921 --result-filename serve_in2048_out128_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 2048 --output-len 128 --num-prompts 50 --request-rate inf --ignore-eos --dataset-name random --input-len 2048 --output-len 128 --num-prompts 50 --request-rate inf --ignore-eos
+  Throughput:  0.15 req/s | 19.8 out tok/s | 336.1 total tok/s
+  Prefill:     mean 158201.8 ms | P50 157998.5 ms | P99 317600.0 ms
+  Decode:      mean 292.1 ms/tok | P50 322.1 ms | P99 370.8 ms
+  E2E:         mean 195303.6 ms | P50 201803.7 ms | P99 323703.1 ms
+  Completed:   50 requests in 323.7s
+
+--- in=2048 out=512 n=50 ---
+  Command: vllm bench serve --backend openai --base-url http://127.0.0.1:8080 --model Qwen3-Coder-30B --endpoint /v1/completions --tokenizer cyankiwi/Qwen3-Coder-30B-A3B-Instruct-AWQ-4bit --save-result --result-dir /home/bren/Code/vllm/bench-results/qwen3-coder-30b-a3b-awq/20260222-095921 --result-filename serve_in2048_out512_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 2048 --output-len 512 --num-prompts 50 --request-rate inf --ignore-eos --dataset-name random --input-len 2048 --output-len 512 --num-prompts 50 --request-rate inf --ignore-eos
+  Throughput:  0.40 req/s | 207.2 out tok/s | 1036.2 total tok/s
+  Prefill:     mean 50745.0 ms | P50 57893.8 ms | P99 112914.2 ms
+  Decode:      mean 35.7 ms/tok | P50 36.1 ms | P99 38.4 ms
+  E2E:         mean 68993.9 ms | P50 76013.2 ms | P99 123513.5 ms
+  Completed:   50 requests in 123.5s
+
+================================================================
+Benchmark complete: 2026-02-22T10:14:03+00:00
+Results saved to:   /home/bren/Code/vllm/bench-results/qwen3-coder-30b-a3b-awq/20260222-095921/
+Summary:            /home/bren/Code/vllm/bench-results/qwen3-coder-30b-a3b-awq/20260222-095921/summary.txt
+================================================================

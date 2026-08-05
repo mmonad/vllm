@@ -1,0 +1,124 @@
+================================================================
+vLLM Benchmark Results
+================================================================
+Config:    configs/rocm/gemma-4-31b-it-fp8.yaml
+Name:      gemma-4-31b-it-fp8
+Backend:   rocm
+Date:      2026-04-26T12:35:01+01:00
+Git SHA:   3f72c42bb
+Server:    http://127.0.0.1:8080
+Model:     gemma-4-31B-it-FP8-block
+GPU:       		AMD Radeon AI PRO R9700
+ROCm:      7.2.2
+
+--- Config Contents ---
+# Gemma-4-31B-IT (FP8-block) — multimodal Gemma 4 (text + image + video)
+# Usage: ./run-vllm.sh configs/rocm/gemma-4-31b-it-fp8.yaml
+# Hardware: 2× 32GB RDNA4 (gfx1201) — FP8 weights + FP8 KV-cache
+#
+# Topology: tensor-parallel-size=2 divides cleanly on every axis:
+#   32 attention heads / 2 = 16, 16 sliding KV heads / 2 = 8,
+#   4 global KV heads / 2 = 2. TP=3 or TP=4 would fail on the 4 global KV heads.
+#
+# Context: layer_types are 5× sliding_attention + 1× full_attention repeated 10×.
+#   Only 10 of 60 layers hold a growing KV cache; the 50 sliding layers stay
+#   bounded at sliding_window=1024 tokens regardless of max-model-len.
+#   Per-GPU KV at native 262144 tokens, FP8, TP=2:
+#     full:    10 × 2 KV heads × 512 head_dim × 2 (K+V) × 262144 ≈ 5.0 GB / seq
+#     sliding: 50 × 8 KV heads × 256 head_dim × 2 (K+V) × 1024   ≈ 0.2 GB / seq
+#   Per-GPU budget: ~16 GB FP8 weights + ~1.5 GB BF16 lm_head + ~1 GB vision
+#   ≈ ~13 GB headroom for KV/activations → ~2 full-context multimodal seqs.
+#
+# Vision caveat: vision_config.max_position_embeddings=131072 (128K). At the
+#   full 256K context, image tokens placed beyond position 131072 fall outside
+#   the vision tower's RoPE table. Keep images in the first half of long
+#   contexts; for image-heavy workloads near the limit, drop max-model-len to
+#   131072 (matches CUDA NVFP4 config default).
+#
+# FP8: quant_method=compressed-tensors with FP8_BLOCK config_group (128×128
+#   blockwise, same kernel path as Qwen3.6's quant_method=fp8). Vision tower,
+#   lm_head, and embed_tokens stay BF16 per the checkpoint's `ignore` list.
+#   run-vllm.sh exports VLLM_ROCM_FP8_PADDING=0 to skip the F.pad() weight copy
+#   during post-processing that OOMs on ROCm (no expandable_segments on HIP).
+#
+# attention_k_eq_v=true: Gemma 4 ties K and V projection weights (~⅓ attn weight
+#   savings) but K and V still materialise separately at runtime — no KV-cache
+#   shrink, only weight-memory savings already reflected in the FP8 totals above.
+
+model: RedHatAI/gemma-4-31B-it-FP8-block
+served-model-name: gemma-4-31B-it-FP8-block
+max-model-len: 262144
+max-num-seqs: 2
+max-num-batched-tokens: 8192
+gpu-memory-utilization: 0.95
+# No quantization flag — vLLM auto-detects FP8_BLOCK from quantization_config
+dtype: bfloat16
+kv-cache-dtype: fp8
+tensor-parallel-size: 2
+trust-remote-code: true
+enforce-eager: false  # re-enabled on RDNA4 — the page-fault-after-Dynamo class of bugs has fixes landed on main (PR #38086, #38455, Apr 2026); revert to true if crashes return
+enable-chunked-prefill: true
+limit-mm-per-prompt:
+  image: 4
+  video: 1
+reasoning-parser: gemma4
+tool-call-parser: gemma4
+enable-auto-tool-choice: true
+--- End Config ---
+================================================================
+
+================ BENCHMARKS ========================
+
+--- in=128 out=128 n=10 ---
+  Command: vllm bench serve --backend openai --base-url http://127.0.0.1:8080 --model gemma-4-31B-it-FP8-block --endpoint /v1/completions --tokenizer RedHatAI/gemma-4-31B-it-FP8-block --save-result --result-dir /home/bren/Code/vllm/bench-results/rocm/gemma-4-31b-it-fp8/20260426-123501 --result-filename serve_in128_out128_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 128 --output-len 128 --num-prompts 10 --request-rate inf --ignore-eos
+  Throughput:  0.33 req/s | 42.6 out tok/s | 85.3 total tok/s
+  Prefill:     mean 12595.3 ms | P50 12789.2 ms | P99 24389.3 ms
+  Decode:      mean 45.4 ms/tok | P50 44.6 ms | P99 49.6 ms
+  E2E:         mean 18364.4 ms | P50 18440.3 ms | P99 30013.3 ms
+  Completed:   10 requests in 30.0s
+
+--- in=128 out=512 n=10 ---
+  Command: vllm bench serve --backend openai --base-url http://127.0.0.1:8080 --model gemma-4-31B-it-FP8-block --endpoint /v1/completions --tokenizer RedHatAI/gemma-4-31B-it-FP8-block --save-result --result-dir /home/bren/Code/vllm/bench-results/rocm/gemma-4-31b-it-fp8/20260426-123501 --result-filename serve_in128_out512_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 128 --output-len 512 --num-prompts 10 --request-rate inf --ignore-eos
+  Throughput:  0.09 req/s | 43.7 out tok/s | 54.6 total tok/s
+  Prefill:     mean 46951.7 ms | P50 46953.0 ms | P99 93822.9 ms
+  Decode:      mean 45.6 ms/tok | P50 45.6 ms | P99 45.6 ms
+  E2E:         mean 70269.0 ms | P50 70270.1 ms | P99 117136.3 ms
+  Completed:   10 requests in 117.1s
+
+--- in=512 out=128 n=10 ---
+  Command: vllm bench serve --backend openai --base-url http://127.0.0.1:8080 --model gemma-4-31B-it-FP8-block --endpoint /v1/completions --tokenizer RedHatAI/gemma-4-31B-it-FP8-block --save-result --result-dir /home/bren/Code/vllm/bench-results/rocm/gemma-4-31b-it-fp8/20260426-123501 --result-filename serve_in512_out128_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 512 --output-len 128 --num-prompts 10 --request-rate inf --ignore-eos
+  Throughput:  0.31 req/s | 39.7 out tok/s | 198.6 total tok/s
+  Prefill:     mean 13339.7 ms | P50 13409.6 ms | P99 26215.3 ms
+  Decode:      mean 47.9 ms/tok | P50 47.5 ms | P99 50.1 ms
+  E2E:         mean 19422.7 ms | P50 19466.2 ms | P99 32222.8 ms
+  Completed:   10 requests in 32.2s
+
+--- in=512 out=512 n=10 ---
+  Command: vllm bench serve --backend openai --base-url http://127.0.0.1:8080 --model gemma-4-31B-it-FP8-block --endpoint /v1/completions --tokenizer RedHatAI/gemma-4-31B-it-FP8-block --save-result --result-dir /home/bren/Code/vllm/bench-results/rocm/gemma-4-31b-it-fp8/20260426-123501 --result-filename serve_in512_out512_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 512 --output-len 512 --num-prompts 10 --request-rate inf --ignore-eos
+  Throughput:  0.08 req/s | 40.0 out tok/s | 80.1 total tok/s
+  Prefill:     mean 51292.0 ms | P50 51295.4 ms | P99 102473.8 ms
+  Decode:      mean 49.8 ms/tok | P50 49.8 ms | P99 49.8 ms
+  E2E:         mean 76728.9 ms | P50 76737.8 ms | P99 127881.5 ms
+  Completed:   10 requests in 127.9s
+
+--- in=2048 out=128 n=10 ---
+  Command: vllm bench serve --backend openai --base-url http://127.0.0.1:8080 --model gemma-4-31B-it-FP8-block --endpoint /v1/completions --tokenizer RedHatAI/gemma-4-31B-it-FP8-block --save-result --result-dir /home/bren/Code/vllm/bench-results/rocm/gemma-4-31b-it-fp8/20260426-123501 --result-filename serve_in2048_out128_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 2048 --output-len 128 --num-prompts 10 --request-rate inf --ignore-eos
+  Throughput:  0.22 req/s | 28.5 out tok/s | 484.5 total tok/s
+  Prefill:     mean 20037.6 ms | P50 20396.3 ms | P99 38165.0 ms
+  Decode:      mean 56.2 ms/tok | P50 52.5 ms | P99 62.1 ms
+  E2E:         mean 27177.5 ms | P50 27658.4 ms | P99 44906.6 ms
+  Completed:   10 requests in 44.9s
+
+--- in=2048 out=512 n=10 ---
+  Command: vllm bench serve --backend openai --base-url http://127.0.0.1:8080 --model gemma-4-31B-it-FP8-block --endpoint /v1/completions --tokenizer RedHatAI/gemma-4-31B-it-FP8-block --save-result --result-dir /home/bren/Code/vllm/bench-results/rocm/gemma-4-31b-it-fp8/20260426-123501 --result-filename serve_in2048_out512_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 2048 --output-len 512 --num-prompts 10 --request-rate inf --ignore-eos
+  Throughput:  0.07 req/s | 38.0 out tok/s | 190.1 total tok/s
+  Prefill:     mean 54062.3 ms | P50 54059.3 ms | P99 107958.6 ms
+  Decode:      mean 52.3 ms/tok | P50 52.3 ms | P99 52.4 ms
+  E2E:         mean 80792.7 ms | P50 80793.3 ms | P99 134669.9 ms
+  Completed:   10 requests in 134.7s
+
+================================================================
+Benchmark complete: 2026-04-26T12:46:48+01:00
+Results saved to:   /home/bren/Code/vllm/bench-results/rocm/gemma-4-31b-it-fp8/20260426-123501/
+Summary:            /home/bren/Code/vllm/bench-results/rocm/gemma-4-31b-it-fp8/20260426-123501/summary.txt
+================================================================

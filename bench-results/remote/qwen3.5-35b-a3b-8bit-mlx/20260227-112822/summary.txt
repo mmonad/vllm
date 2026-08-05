@@ -1,0 +1,77 @@
+================================================================
+vLLM Benchmark Results
+================================================================
+Config:    configs/qwen3.5-35b-a3b-8bit-mlx.yaml
+Name:      qwen3.5-35b-a3b-8bit-mlx
+Date:      2026-02-27T11:28:22+00:00
+Git SHA:   b7a2fe3f9
+Server:    http://mbp:8080
+Model:     mlx-community/Qwen3.5-35B-A3B-8bit
+GPU:       		AMD Radeon AI PRO R9700
+ROCm:      7.2.0
+
+--- Config Contents ---
+# Qwen3.5-35B-A3B (MLX 8-bit) — remote benchmark config for mlx-lm on MBP
+# Usage: BENCH_HOST=mbp ./bench-vllm.sh configs/qwen3.5-35b-a3b-8bit-mlx.yaml
+
+model: mlx-community/Qwen3.5-35B-A3B-8bit
+served-model-name: mlx-community/Qwen3.5-35B-A3B-8bit
+trust-remote-code: true
+--- End Config ---
+================================================================
+
+================ BENCHMARKS ========================
+
+--- in=128 out=128 n=10 ---
+  Command: vllm bench serve --backend openai --base-url http://mbp:8080 --model mlx-community/Qwen3.5-35B-A3B-8bit --endpoint /v1/completions --tokenizer mlx-community/Qwen3.5-35B-A3B-8bit --save-result --result-dir /home/bren/Code/vllm/bench-results/qwen3.5-35b-a3b-8bit-mlx/20260227-112822 --result-filename serve_in128_out128_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 128 --output-len 128 --num-prompts 10 --request-rate inf --ignore-eos
+  Throughput:  0.27 req/s | 34.1 out tok/s | 68.1 total tok/s
+  Prefill:     mean 3904.7 ms | P50 4297.1 ms | P99 4297.5 ms
+  Decode:      mean 264.8 ms/tok | P50 262.0 ms | P99 287.8 ms
+  E2E:         mean 37539.8 ms | P50 37572.3 ms | P99 37572.8 ms
+  Completed:   10 requests in 37.6s
+
+--- in=128 out=512 n=10 ---
+  Command: vllm bench serve --backend openai --base-url http://mbp:8080 --model mlx-community/Qwen3.5-35B-A3B-8bit --endpoint /v1/completions --tokenizer mlx-community/Qwen3.5-35B-A3B-8bit --save-result --result-dir /home/bren/Code/vllm/bench-results/qwen3.5-35b-a3b-8bit-mlx/20260227-112822 --result-filename serve_in128_out512_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 128 --output-len 512 --num-prompts 10 --request-rate inf --ignore-eos
+  Throughput:  0.06 req/s | 28.7 out tok/s | 35.8 total tok/s
+  Prefill:     mean 4707.6 ms | P50 5161.4 ms | P99 5162.0 ms
+  Decode:      mean 340.1 ms/tok | P50 339.3 ms | P99 346.8 ms
+  E2E:         mean 178507.1 ms | P50 178539.7 ms | P99 178540.3 ms
+  Completed:   10 requests in 178.5s
+
+--- in=512 out=128 n=10 ---
+  Command: vllm bench serve --backend openai --base-url http://mbp:8080 --model mlx-community/Qwen3.5-35B-A3B-8bit --endpoint /v1/completions --tokenizer mlx-community/Qwen3.5-35B-A3B-8bit --save-result --result-dir /home/bren/Code/vllm/bench-results/qwen3.5-35b-a3b-8bit-mlx/20260227-112822 --result-filename serve_in512_out128_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 512 --output-len 128 --num-prompts 10 --request-rate inf --ignore-eos
+  Throughput:  0.21 req/s | 26.3 out tok/s | 131.3 total tok/s
+  Prefill:     mean 14288.9 ms | P50 15723.1 ms | P99 15723.9 ms
+  Decode:      mean 270.9 ms/tok | P50 259.9 ms | P99 360.3 ms
+  E2E:         mean 48699.2 ms | P50 48732.3 ms | P99 48733.2 ms
+  Completed:   10 requests in 48.7s
+
+--- in=512 out=512 n=10 ---
+  Command: vllm bench serve --backend openai --base-url http://mbp:8080 --model mlx-community/Qwen3.5-35B-A3B-8bit --endpoint /v1/completions --tokenizer mlx-community/Qwen3.5-35B-A3B-8bit --save-result --result-dir /home/bren/Code/vllm/bench-results/qwen3.5-35b-a3b-8bit-mlx/20260227-112822 --result-filename serve_in512_out512_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 512 --output-len 512 --num-prompts 10 --request-rate inf --ignore-eos
+  Throughput:  0.06 req/s | 29.9 out tok/s | 59.8 total tok/s
+  Prefill:     mean 12994.2 ms | P50 14286.4 ms | P99 14287.1 ms
+  Decode:      mean 309.5 ms/tok | P50 307.0 ms | P99 329.4 ms
+  E2E:         mean 171124.3 ms | P50 171156.5 ms | P99 171157.3 ms
+  Completed:   10 requests in 171.2s
+
+--- in=2048 out=128 n=10 ---
+  Command: vllm bench serve --backend openai --base-url http://mbp:8080 --model mlx-community/Qwen3.5-35B-A3B-8bit --endpoint /v1/completions --tokenizer mlx-community/Qwen3.5-35B-A3B-8bit --save-result --result-dir /home/bren/Code/vllm/bench-results/qwen3.5-35b-a3b-8bit-mlx/20260227-112822 --result-filename serve_in2048_out128_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 2048 --output-len 128 --num-prompts 10 --request-rate inf --ignore-eos
+  Throughput:  0.04 req/s | 0.0 out tok/s | 84.0 total tok/s
+  Prefill:     mean 5369.7 ms | P50 5369.7 ms | P99 5369.7 ms
+  Decode:      mean 0.0 ms/tok | P50 0.0 ms | P99 0.0 ms
+  E2E:         mean 5369.7 ms | P50 5369.7 ms | P99 5369.7 ms
+  Completed:   1 requests in 24.4s
+
+--- in=2048 out=512 n=10 ---
+  Command: vllm bench serve --backend openai --base-url http://mbp:8080 --model mlx-community/Qwen3.5-35B-A3B-8bit --endpoint /v1/completions --tokenizer mlx-community/Qwen3.5-35B-A3B-8bit --save-result --result-dir /home/bren/Code/vllm/bench-results/qwen3.5-35b-a3b-8bit-mlx/20260227-112822 --result-filename serve_in2048_out512_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 2048 --output-len 512 --num-prompts 10 --request-rate inf --ignore-eos
+  Throughput:  0.00 req/s | 0.0 out tok/s | 0.0 total tok/s
+  Prefill:     mean 0.0 ms | P50 0.0 ms | P99 0.0 ms
+  Decode:      mean 0.0 ms/tok | P50 0.0 ms | P99 0.0 ms
+  E2E:         mean 0.0 ms | P50 0.0 ms | P99 0.0 ms
+  Completed:   0 requests in 3.1s
+
+================================================================
+Benchmark complete: 2026-02-27T11:38:04+00:00
+Results saved to:   /home/bren/Code/vllm/bench-results/qwen3.5-35b-a3b-8bit-mlx/20260227-112822/
+Summary:            /home/bren/Code/vllm/bench-results/qwen3.5-35b-a3b-8bit-mlx/20260227-112822/summary.txt
+================================================================

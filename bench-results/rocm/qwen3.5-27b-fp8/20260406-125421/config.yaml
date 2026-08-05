@@ -1,0 +1,28 @@
+# Qwen3.5-27B (FP8) — hybrid DeltaNet+Attention dense model
+# Usage: VLLM_ROCM_FP8_PADDING=0 ./run-vllm.sh configs/qwen3.5-27b-fp8.yaml
+# Hardware: 32GB RDNA4 (gfx12) — FP8 weights + FP8 KV-cache
+# Note: ~28.3GB model weights + ~3.2GB PyTorch allocator overhead = ~31.5GB.
+#   VLLM_ROCM_FP8_PADDING=0 skips the F.pad() weight copy during post-processing
+#   that OOMs on ROCm (expandable_segments not supported on HIP).
+
+model: Qwen/Qwen3.5-27B-FP8
+served-model-name: Qwen3.5-27B-FP8
+max-model-len: 8192
+max-num-seqs: 25
+gpu-memory-utilization: 0.95
+# No quantization flag needed — vLLM auto-detects FP8 from model config
+dtype: bfloat16
+kv-cache-dtype: fp8
+tensor-parallel-size: 2
+trust-remote-code: true
+enforce-eager: true
+language-model-only: true
+reasoning-parser: qwen3
+override-generation-config:
+  temperature: 0.6
+  top_p: 0.95
+  top_k: 20
+  min_p: 0.0
+enable-auto-tool-choice: true
+tool-call-parser: qwen3_coder
+speculative-config: '{"method":"mtp","num_speculative_tokens":2}'

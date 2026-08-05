@@ -1,0 +1,85 @@
+================================================================
+vLLM Benchmark Results
+================================================================
+Config:    configs/qwen3.5-122b-int4-autoround-spark2.yaml
+Name:      qwen3.5-122b-int4-autoround-spark2
+Date:      2026-03-04T15:21:25+00:00
+Git SHA:   e06debd26
+Server:    http://spark2:8080
+Model:     Intel/Qwen3.5-122B-A10B-int4-AutoRound
+GPU:       		AMD Radeon AI PRO R9700
+ROCm:      7.2.0
+
+--- Config Contents ---
+# Qwen3.5-122B-A10B-INT4-Autoround — remote server on spark2
+# Launched via spark-vllm-docker recipe with:
+#   ./run-recipe.sh qwen3.5-122b-int4-autoround --setup --solo --port 8080 \
+#     --gpu-memory-utilization 0.9 --kv-cache-dtype fp8
+#
+# Effective: tp=1, gpu-mem=0.9, max-model-len=262144, prefix-caching enabled
+
+model: Intel/Qwen3.5-122B-A10B-int4-AutoRound
+served-model-name: Intel/Qwen3.5-122B-A10B-int4-AutoRound
+host: spark2
+port: 8080
+trust-remote-code: true
+kv-cache-dtype: fp8
+reasoning-parser: qwen3
+--- End Config ---
+================================================================
+
+================ BENCHMARKS ========================
+
+--- in=128 out=128 n=10 ---
+  Command: vllm bench serve --backend openai --base-url http://spark2:8080 --model Intel/Qwen3.5-122B-A10B-int4-AutoRound --endpoint /v1/completions --tokenizer Intel/Qwen3.5-122B-A10B-int4-AutoRound --save-result --result-dir /home/bren/Code/vllm/bench-results/qwen3.5-122b-int4-autoround-spark2/20260304-152125 --result-filename serve_in128_out128_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 128 --output-len 128 --num-prompts 10 --request-rate inf --ignore-eos
+  Throughput:  0.32 req/s | 41.1 out tok/s | 82.2 total tok/s
+  Prefill:     mean 11413.8 ms | P50 11415.4 ms | P99 11416.4 ms
+  Decode:      mean 155.2 ms/tok | P50 155.3 ms | P99 155.3 ms
+  E2E:         mean 31126.3 ms | P50 31141.1 ms | P99 31142.0 ms
+  Completed:   10 requests in 31.1s
+
+--- in=128 out=512 n=10 ---
+  Command: vllm bench serve --backend openai --base-url http://spark2:8080 --model Intel/Qwen3.5-122B-A10B-int4-AutoRound --endpoint /v1/completions --tokenizer Intel/Qwen3.5-122B-A10B-int4-AutoRound --save-result --result-dir /home/bren/Code/vllm/bench-results/qwen3.5-122b-int4-autoround-spark2/20260304-152125 --result-filename serve_in128_out512_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 128 --output-len 512 --num-prompts 10 --request-rate inf --ignore-eos
+  Throughput:  0.12 req/s | 59.2 out tok/s | 74.0 total tok/s
+  Prefill:     mean 1885.5 ms | P50 2029.4 ms | P99 2030.1 ms
+  Decode:      mean 165.4 ms/tok | P50 165.2 ms | P99 166.3 ms
+  E2E:         mean 86424.9 ms | P50 86453.7 ms | P99 86454.4 ms
+  Completed:   10 requests in 86.5s
+
+--- in=512 out=128 n=10 ---
+  Command: vllm bench serve --backend openai --base-url http://spark2:8080 --model Intel/Qwen3.5-122B-A10B-int4-AutoRound --endpoint /v1/completions --tokenizer Intel/Qwen3.5-122B-A10B-int4-AutoRound --save-result --result-dir /home/bren/Code/vllm/bench-results/qwen3.5-122b-int4-autoround-spark2/20260304-152125 --result-filename serve_in512_out128_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 512 --output-len 128 --num-prompts 10 --request-rate inf --ignore-eos
+  Throughput:  0.39 req/s | 50.0 out tok/s | 249.9 total tok/s
+  Prefill:     mean 5691.1 ms | P50 6128.2 ms | P99 6129.2 ms
+  Decode:      mean 156.6 ms/tok | P50 153.4 ms | P99 169.6 ms
+  E2E:         mean 25578.3 ms | P50 25604.5 ms | P99 25605.5 ms
+  Completed:   10 requests in 25.6s
+
+--- in=512 out=512 n=10 ---
+  Command: vllm bench serve --backend openai --base-url http://spark2:8080 --model Intel/Qwen3.5-122B-A10B-int4-AutoRound --endpoint /v1/completions --tokenizer Intel/Qwen3.5-122B-A10B-int4-AutoRound --save-result --result-dir /home/bren/Code/vllm/bench-results/qwen3.5-122b-int4-autoround-spark2/20260304-152125 --result-filename serve_in512_out512_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 512 --output-len 512 --num-prompts 10 --request-rate inf --ignore-eos
+  Throughput:  0.11 req/s | 57.3 out tok/s | 114.5 total tok/s
+  Prefill:     mean 5683.4 ms | P50 6122.5 ms | P99 6123.6 ms
+  Decode:      mean 163.8 ms/tok | P50 163.0 ms | P99 167.0 ms
+  E2E:         mean 89395.7 ms | P50 89423.4 ms | P99 89424.5 ms
+  Completed:   10 requests in 89.4s
+
+--- in=2048 out=128 n=10 ---
+  Command: vllm bench serve --backend openai --base-url http://spark2:8080 --model Intel/Qwen3.5-122B-A10B-int4-AutoRound --endpoint /v1/completions --tokenizer Intel/Qwen3.5-122B-A10B-int4-AutoRound --save-result --result-dir /home/bren/Code/vllm/bench-results/qwen3.5-122b-int4-autoround-spark2/20260304-152125 --result-filename serve_in2048_out128_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 2048 --output-len 128 --num-prompts 10 --request-rate inf --ignore-eos
+  Throughput:  0.16 req/s | 20.8 out tok/s | 353.0 total tok/s
+  Prefill:     mean 30698.7 ms | P50 32454.6 ms | P99 42065.8 ms
+  Decode:      mean 242.7 ms/tok | P50 229.0 ms | P99 371.9 ms
+  E2E:         mean 61517.6 ms | P50 61538.7 ms | P99 61636.0 ms
+  Completed:   10 requests in 61.6s
+
+--- in=2048 out=512 n=10 ---
+  Command: vllm bench serve --backend openai --base-url http://spark2:8080 --model Intel/Qwen3.5-122B-A10B-int4-AutoRound --endpoint /v1/completions --tokenizer Intel/Qwen3.5-122B-A10B-int4-AutoRound --save-result --result-dir /home/bren/Code/vllm/bench-results/qwen3.5-122b-int4-autoround-spark2/20260304-152125 --result-filename serve_in2048_out512_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 2048 --output-len 512 --num-prompts 10 --request-rate inf --ignore-eos
+  Throughput:  0.10 req/s | 50.8 out tok/s | 254.2 total tok/s
+  Prefill:     mean 18793.9 ms | P50 20546.1 ms | P99 22742.9 ms
+  Decode:      mean 160.0 ms/tok | P50 156.6 ms | P99 177.6 ms
+  E2E:         mean 100570.9 ms | P50 100591.9 ms | P99 100697.2 ms
+  Completed:   10 requests in 100.7s
+
+================================================================
+Benchmark complete: 2026-03-04T15:33:24+00:00
+Results saved to:   /home/bren/Code/vllm/bench-results/qwen3.5-122b-int4-autoround-spark2/20260304-152125/
+Summary:            /home/bren/Code/vllm/bench-results/qwen3.5-122b-int4-autoround-spark2/20260304-152125/summary.txt
+================================================================

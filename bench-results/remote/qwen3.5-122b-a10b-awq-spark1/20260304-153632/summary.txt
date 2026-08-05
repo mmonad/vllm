@@ -1,0 +1,82 @@
+================================================================
+vLLM Benchmark Results
+================================================================
+Config:    configs/qwen3.5-122b-a10b-awq-spark1.yaml
+Name:      qwen3.5-122b-a10b-awq-spark1
+Date:      2026-03-04T15:36:32+00:00
+Git SHA:   e06debd26
+Server:    http://spark1:8080
+Model:     cyankiwi/Qwen3.5-122B-A10B-AWQ-4bit
+GPU:       		AMD Radeon AI PRO R9700
+ROCm:      7.2.0
+
+--- Config Contents ---
+# Qwen3.5-122B-A10B-AWQ-4bit — remote server on spark1
+# Benchmarking config only
+
+model: cyankiwi/Qwen3.5-122B-A10B-AWQ-4bit
+served-model-name: cyankiwi/Qwen3.5-122B-A10B-AWQ-4bit
+host: spark1
+port: 8080
+max-model-len: 102400
+trust-remote-code: true
+kv-cache-dtype: fp8
+reasoning-parser: qwen3
+--- End Config ---
+================================================================
+
+================ BENCHMARKS ========================
+
+--- in=128 out=128 n=10 ---
+  Command: vllm bench serve --backend openai --base-url http://spark1:8080 --model cyankiwi/Qwen3.5-122B-A10B-AWQ-4bit --endpoint /v1/completions --tokenizer cyankiwi/Qwen3.5-122B-A10B-AWQ-4bit --save-result --result-dir /home/bren/Code/vllm/bench-results/qwen3.5-122b-a10b-awq-spark1/20260304-153632 --result-filename serve_in128_out128_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 128 --output-len 128 --num-prompts 10 --request-rate inf --ignore-eos
+  Throughput:  0.16 req/s | 20.9 out tok/s | 41.7 total tok/s
+  Prefill:     mean 40452.0 ms | P50 40388.5 ms | P99 40706.0 ms
+  Decode:      mean 164.4 ms/tok | P50 164.9 ms | P99 164.9 ms
+  E2E:         mean 61327.6 ms | P50 61327.6 ms | P99 61328.3 ms
+  Completed:   10 requests in 61.3s
+
+--- in=128 out=512 n=10 ---
+  Command: vllm bench serve --backend openai --base-url http://spark1:8080 --model cyankiwi/Qwen3.5-122B-A10B-AWQ-4bit --endpoint /v1/completions --tokenizer cyankiwi/Qwen3.5-122B-A10B-AWQ-4bit --save-result --result-dir /home/bren/Code/vllm/bench-results/qwen3.5-122b-a10b-awq-spark1/20260304-153632 --result-filename serve_in128_out512_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 128 --output-len 512 --num-prompts 10 --request-rate inf --ignore-eos
+  Throughput:  0.12 req/s | 59.5 out tok/s | 74.4 total tok/s
+  Prefill:     mean 875.5 ms | P50 943.1 ms | P99 944.2 ms
+  Decode:      mean 166.6 ms/tok | P50 166.5 ms | P99 167.0 ms
+  E2E:         mean 86007.6 ms | P50 86028.8 ms | P99 86029.9 ms
+  Completed:   10 requests in 86.0s
+
+--- in=512 out=128 n=10 ---
+  Command: vllm bench serve --backend openai --base-url http://spark1:8080 --model cyankiwi/Qwen3.5-122B-A10B-AWQ-4bit --endpoint /v1/completions --tokenizer cyankiwi/Qwen3.5-122B-A10B-AWQ-4bit --save-result --result-dir /home/bren/Code/vllm/bench-results/qwen3.5-122b-a10b-awq-spark1/20260304-153632 --result-filename serve_in512_out128_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 512 --output-len 128 --num-prompts 10 --request-rate inf --ignore-eos
+  Throughput:  0.34 req/s | 43.2 out tok/s | 216.1 total tok/s
+  Prefill:     mean 5415.8 ms | P50 5588.7 ms | P99 9248.6 ms
+  Decode:      mean 189.5 ms/tok | P50 188.2 ms | P99 222.0 ms
+  E2E:         mean 29478.0 ms | P50 29495.9 ms | P99 29613.0 ms
+  Completed:   10 requests in 29.6s
+
+--- in=512 out=512 n=10 ---
+  Command: vllm bench serve --backend openai --base-url http://spark1:8080 --model cyankiwi/Qwen3.5-122B-A10B-AWQ-4bit --endpoint /v1/completions --tokenizer cyankiwi/Qwen3.5-122B-A10B-AWQ-4bit --save-result --result-dir /home/bren/Code/vllm/bench-results/qwen3.5-122b-a10b-awq-spark1/20260304-153632 --result-filename serve_in512_out512_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 512 --output-len 512 --num-prompts 10 --request-rate inf --ignore-eos
+  Throughput:  0.11 req/s | 57.5 out tok/s | 115.1 total tok/s
+  Prefill:     mean 2045.7 ms | P50 2216.4 ms | P99 2614.3 ms
+  Decode:      mean 169.9 ms/tok | P50 169.6 ms | P99 171.6 ms
+  E2E:         mean 88860.3 ms | P50 88878.0 ms | P99 88995.0 ms
+  Completed:   10 requests in 89.0s
+
+--- in=2048 out=128 n=10 ---
+  Command: vllm bench serve --backend openai --base-url http://spark1:8080 --model cyankiwi/Qwen3.5-122B-A10B-AWQ-4bit --endpoint /v1/completions --tokenizer cyankiwi/Qwen3.5-122B-A10B-AWQ-4bit --save-result --result-dir /home/bren/Code/vllm/bench-results/qwen3.5-122b-a10b-awq-spark1/20260304-153632 --result-filename serve_in2048_out128_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 2048 --output-len 128 --num-prompts 10 --request-rate inf --ignore-eos
+  Throughput:  0.33 req/s | 42.3 out tok/s | 719.0 total tok/s
+  Prefill:     mean 6265.7 ms | P50 6503.1 ms | P99 9532.2 ms
+  Decode:      mean 185.5 ms/tok | P50 184.1 ms | P99 217.1 ms
+  E2E:         mean 29827.1 ms | P50 29888.5 ms | P99 30258.9 ms
+  Completed:   10 requests in 30.3s
+
+--- in=2048 out=512 n=10 ---
+  Command: vllm bench serve --backend openai --base-url http://spark1:8080 --model cyankiwi/Qwen3.5-122B-A10B-AWQ-4bit --endpoint /v1/completions --tokenizer cyankiwi/Qwen3.5-122B-A10B-AWQ-4bit --save-result --result-dir /home/bren/Code/vllm/bench-results/qwen3.5-122b-a10b-awq-spark1/20260304-153632 --result-filename serve_in2048_out512_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 2048 --output-len 512 --num-prompts 10 --request-rate inf --ignore-eos
+  Throughput:  0.11 req/s | 53.9 out tok/s | 269.6 total tok/s
+  Prefill:     mean 6214.6 ms | P50 6438.7 ms | P99 9520.9 ms
+  Decode:      mean 172.8 ms/tok | P50 172.5 ms | P99 180.6 ms
+  E2E:         mean 94532.3 ms | P50 94592.5 ms | P99 94960.3 ms
+  Completed:   10 requests in 95.0s
+
+================================================================
+Benchmark complete: 2026-03-04T15:49:01+00:00
+Results saved to:   /home/bren/Code/vllm/bench-results/qwen3.5-122b-a10b-awq-spark1/20260304-153632/
+Summary:            /home/bren/Code/vllm/bench-results/qwen3.5-122b-a10b-awq-spark1/20260304-153632/summary.txt
+================================================================

@@ -1,0 +1,95 @@
+================================================================
+vLLM Benchmark Results
+================================================================
+Config:    configs/cuda/qwen3.5-27b-fp8.yaml
+Name:      qwen3.5-27b-fp8
+Backend:   cuda
+Date:      2026-03-25T07:59:48+00:00
+Git SHA:   5e493e32c
+Server:    http://127.0.0.1:8080
+Model:     Qwen3.5-27B-FP8
+GPU:       NVIDIA RTX PRO 6000 Blackwell Workstation Edition
+Driver:    595.58.03
+CUDA:      13.1
+
+--- Config Contents ---
+# Qwen3.5-27B (FP8) — hybrid DeltaNet+Attention dense model
+# Usage: ./run-vllm.sh configs/cuda/qwen3.5-27b-fp8.yaml
+# Hardware: RTX Pro 6000 (96GB) — FP8 weights + FP8 KV-cache
+
+model: Qwen/Qwen3.5-27B-FP8
+served-model-name: Qwen3.5-27B-FP8
+max-model-len: 262144
+gpu-memory-utilization: 0.9
+dtype: bfloat16
+kv-cache-dtype: fp8
+tensor-parallel-size: 1
+trust-remote-code: true
+language-model-only: true
+reasoning-parser: qwen3
+override-generation-config:
+  temperature: 0.6
+  top_p: 0.95
+  top_k: 20
+  min_p: 0.0
+enable-auto-tool-choice: true
+tool-call-parser: qwen3_coder
+speculative-config: '{"method":"mtp","num_speculative_tokens":2}'
+--- End Config ---
+================================================================
+
+================ BENCHMARKS ========================
+
+--- in=128 out=128 n=10 ---
+  Command: vllm bench serve --backend openai --base-url http://127.0.0.1:8080 --model Qwen3.5-27B-FP8 --endpoint /v1/completions --tokenizer Qwen/Qwen3.5-27B-FP8 --save-result --result-dir /home/bren/Code/vllm/bench-results/cuda/qwen3.5-27b-fp8/20260325-075948 --result-filename serve_in128_out128_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 128 --output-len 128 --num-prompts 10 --request-rate inf --ignore-eos
+  Throughput:  1.85 req/s | 237.3 out tok/s | 474.5 total tok/s
+  Prefill:     mean 3383.3 ms | P50 3386.7 ms | P99 3387.3 ms
+  Decode:      mean 13.8 ms/tok | P50 13.9 ms | P99 15.7 ms
+  E2E:         mean 5132.5 ms | P50 5150.1 ms | P99 5385.1 ms
+  Completed:   10 requests in 5.4s
+
+--- in=128 out=512 n=10 ---
+  Command: vllm bench serve --backend openai --base-url http://127.0.0.1:8080 --model Qwen3.5-27B-FP8 --endpoint /v1/completions --tokenizer Qwen/Qwen3.5-27B-FP8 --save-result --result-dir /home/bren/Code/vllm/bench-results/cuda/qwen3.5-27b-fp8/20260325-075948 --result-filename serve_in128_out512_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 128 --output-len 512 --num-prompts 10 --request-rate inf --ignore-eos
+  Throughput:  1.24 req/s | 633.9 out tok/s | 792.4 total tok/s
+  Prefill:     mean 208.8 ms | P50 212.2 ms | P99 212.8 ms
+  Decode:      mean 13.6 ms/tok | P50 13.6 ms | P99 15.4 ms
+  E2E:         mean 7152.3 ms | P50 7173.1 ms | P99 8073.3 ms
+  Completed:   10 requests in 8.1s
+
+--- in=512 out=128 n=10 ---
+  Command: vllm bench serve --backend openai --base-url http://127.0.0.1:8080 --model Qwen3.5-27B-FP8 --endpoint /v1/completions --tokenizer Qwen/Qwen3.5-27B-FP8 --save-result --result-dir /home/bren/Code/vllm/bench-results/cuda/qwen3.5-27b-fp8/20260325-075948 --result-filename serve_in512_out128_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 512 --output-len 128 --num-prompts 10 --request-rate inf --ignore-eos
+  Throughput:  3.76 req/s | 481.5 out tok/s | 2407.5 total tok/s
+  Prefill:     mean 607.9 ms | P50 611.6 ms | P99 612.2 ms
+  Decode:      mean 14.4 ms/tok | P50 14.1 ms | P99 16.1 ms
+  E2E:         mean 2442.4 ms | P50 2397.7 ms | P99 2658.1 ms
+  Completed:   10 requests in 2.7s
+
+--- in=512 out=512 n=10 ---
+  Command: vllm bench serve --backend openai --base-url http://127.0.0.1:8080 --model Qwen3.5-27B-FP8 --endpoint /v1/completions --tokenizer Qwen/Qwen3.5-27B-FP8 --save-result --result-dir /home/bren/Code/vllm/bench-results/cuda/qwen3.5-27b-fp8/20260325-075948 --result-filename serve_in512_out512_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 512 --output-len 512 --num-prompts 10 --request-rate inf --ignore-eos
+  Throughput:  1.17 req/s | 600.2 out tok/s | 1200.3 total tok/s
+  Prefill:     mean 609.5 ms | P50 613.1 ms | P99 613.8 ms
+  Decode:      mean 13.1 ms/tok | P50 12.5 ms | P99 15.4 ms
+  E2E:         mean 7315.4 ms | P50 6999.3 ms | P99 8495.5 ms
+  Completed:   10 requests in 8.5s
+
+--- in=2048 out=128 n=10 ---
+  Command: vllm bench serve --backend openai --base-url http://127.0.0.1:8080 --model Qwen3.5-27B-FP8 --endpoint /v1/completions --tokenizer Qwen/Qwen3.5-27B-FP8 --save-result --result-dir /home/bren/Code/vllm/bench-results/cuda/qwen3.5-27b-fp8/20260325-075948 --result-filename serve_in2048_out128_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 2048 --output-len 128 --num-prompts 10 --request-rate inf --ignore-eos
+  Throughput:  1.51 req/s | 193.7 out tok/s | 3293.5 total tok/s
+  Prefill:     mean 2336.9 ms | P50 2524.4 ms | P99 2559.0 ms
+  Decode:      mean 17.3 ms/tok | P50 15.4 ms | P99 30.9 ms
+  E2E:         mean 4530.9 ms | P50 4331.2 ms | P99 6430.7 ms
+  Completed:   10 requests in 6.6s
+
+--- in=2048 out=512 n=10 ---
+  Command: vllm bench serve --backend openai --base-url http://127.0.0.1:8080 --model Qwen3.5-27B-FP8 --endpoint /v1/completions --tokenizer Qwen/Qwen3.5-27B-FP8 --save-result --result-dir /home/bren/Code/vllm/bench-results/cuda/qwen3.5-27b-fp8/20260325-075948 --result-filename serve_in2048_out512_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 2048 --output-len 512 --num-prompts 10 --request-rate inf --ignore-eos
+  Throughput:  0.61 req/s | 311.6 out tok/s | 1557.9 total tok/s
+  Prefill:     mean 5315.6 ms | P50 5500.0 ms | P99 8707.6 ms
+  Decode:      mean 20.0 ms/tok | P50 19.9 ms | P99 26.2 ms
+  E2E:         mean 15534.3 ms | P50 15325.6 ms | P99 16428.7 ms
+  Completed:   10 requests in 16.4s
+
+================================================================
+Benchmark complete: 2026-03-25T08:02:05+00:00
+Results saved to:   /home/bren/Code/vllm/bench-results/cuda/qwen3.5-27b-fp8/20260325-075948/
+Summary:            /home/bren/Code/vllm/bench-results/cuda/qwen3.5-27b-fp8/20260325-075948/summary.txt
+================================================================

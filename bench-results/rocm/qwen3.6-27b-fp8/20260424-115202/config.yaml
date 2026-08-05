@@ -1,0 +1,46 @@
+# Qwen3.6-27B (FP8) — hybrid linear/full-attention dense model, text-only
+# Usage: ./run-vllm.sh configs/rocm/qwen3.6-27b-fp8.yaml
+# Hardware: 2× 32GB RDNA4 (gfx1201) — FP8 weights + FP8 KV-cache
+#
+# Topology: tensor-parallel-size=2 divides cleanly on every axis:
+#   24 attention heads / 2 = 12, 4 KV heads / 2 = 2, dense MLP (no experts).
+#
+# Context: layer_types are 3× linear_attention + 1× full_attention repeated 16×.
+#   Only 16 of 64 layers hold a growing KV cache, so at native 262144 tokens each
+#   sequence consumes ~4.3GB per GPU (2 KV heads/rank × 256 × 2 × 16 × 262144 FP8).
+#   Per-GPU budget: ~13.5GB weights + ~17GB headroom → ~3-4 full-context seqs.
+#
+# FP8: quant_method=fp8 with weight_block_size=[128,128]. run-vllm.sh exports
+#   VLLM_ROCM_FP8_PADDING=0 to skip the F.pad() weight copy during post-processing
+#   that OOMs on ROCm (no expandable_segments on HIP).
+#
+# Text-only: base checkpoint ships a ViT vision tower (Qwen3_5ForConditionalGeneration).
+#   language-model-only=true skips loading it — vision weights aren't FP8-quantized
+#   and would otherwise eat VRAM that KV/activations need.
+
+model: Qwen/Qwen3.6-27B-FP8
+served-model-name: Qwen3.6-27B-FP8
+max-model-len: 262144
+max-num-seqs: 4
+max-num-batched-tokens: 8192
+gpu-memory-utilization: 0.95
+# No quantization flag — vLLM auto-detects FP8 from quantization_config
+dtype: bfloat16
+kv-cache-dtype: fp8
+tensor-parallel-size: 2
+trust-remote-code: true
+enforce-eager: false  # re-enabled on RDNA4 — the page-fault-after-Dynamo class of bugs has fixes landed on main (PR #38086, #38455, Apr 2026); revert to true if crashes return
+language-model-only: true
+enable-chunked-prefill: true
+reasoning-parser: qwen3
+# Qwen3 thinking-mode sampling defaults for general tasks
+override-generation-config:
+  temperature: 1.0
+  top_p: 0.95
+  top_k: 20
+  min_p: 0.0
+  presence_penalty: 0.0
+  repetition_penalty: 1.0
+enable-auto-tool-choice: true
+tool-call-parser: qwen3_coder
+speculative-config: '{"method":"mtp","num_speculative_tokens":2}'

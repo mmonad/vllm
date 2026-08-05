@@ -1,0 +1,115 @@
+================================================================
+vLLM Benchmark Results
+================================================================
+Config:    configs/rocm/qwen3.6-27b-fp8.yaml
+Name:      qwen3.6-27b-fp8
+Backend:   rocm
+Date:      2026-04-24T09:59:53+01:00
+Git SHA:   8654a6235
+Server:    http://127.0.0.1:8080
+Model:     Qwen3.6-27B-FP8
+GPU:       		AMD Radeon AI PRO R9700
+ROCm:      7.2.2
+
+--- Config Contents ---
+# Qwen3.6-27B (FP8) — hybrid linear/full-attention dense model, text-only
+# Usage: ./run-vllm.sh configs/rocm/qwen3.6-27b-fp8.yaml
+# Hardware: 2× 32GB RDNA4 (gfx1201) — FP8 weights + FP8 KV-cache
+#
+# Topology: tensor-parallel-size=2 divides cleanly on every axis:
+#   24 attention heads / 2 = 12, 4 KV heads / 2 = 2, dense MLP (no experts).
+#
+# Context: layer_types are 3× linear_attention + 1× full_attention repeated 16×.
+#   Only 16 of 64 layers hold a growing KV cache, so at native 262144 tokens each
+#   sequence consumes ~4.3GB per GPU (2 KV heads/rank × 256 × 2 × 16 × 262144 FP8).
+#   Per-GPU budget: ~13.5GB weights + ~17GB headroom → ~3-4 full-context seqs.
+#
+# FP8: quant_method=fp8 with weight_block_size=[128,128]. run-vllm.sh exports
+#   VLLM_ROCM_FP8_PADDING=0 to skip the F.pad() weight copy during post-processing
+#   that OOMs on ROCm (no expandable_segments on HIP).
+#
+# Text-only: base checkpoint ships a ViT vision tower (Qwen3_5ForConditionalGeneration).
+#   language-model-only=true skips loading it — vision weights aren't FP8-quantized
+#   and would otherwise eat VRAM that KV/activations need.
+
+model: Qwen/Qwen3.6-27B-FP8
+served-model-name: Qwen3.6-27B-FP8
+max-model-len: 262144
+max-num-seqs: 4
+max-num-batched-tokens: 8192
+gpu-memory-utilization: 0.95
+# No quantization flag — vLLM auto-detects FP8 from quantization_config
+dtype: bfloat16
+kv-cache-dtype: fp8
+tensor-parallel-size: 2
+trust-remote-code: true
+enforce-eager: true  # required on RDNA4 — torch.compile causes GPU page fault after Dynamo trace
+language-model-only: true
+enable-chunked-prefill: true
+reasoning-parser: qwen3
+override-generation-config:
+  temperature: 0.6
+  top_p: 0.95
+  top_k: 20
+  min_p: 0.0
+enable-auto-tool-choice: true
+tool-call-parser: qwen3_coder
+speculative-config: '{"method":"mtp","num_speculative_tokens":2}'
+--- End Config ---
+================================================================
+
+================ BENCHMARKS ========================
+
+--- in=128 out=128 n=10 ---
+  Command: vllm bench serve --backend openai --base-url http://127.0.0.1:8080 --model Qwen3.6-27B-FP8 --endpoint /v1/completions --tokenizer Qwen/Qwen3.6-27B-FP8 --save-result --result-dir /home/bren/Code/vllm/bench-results/rocm/qwen3.6-27b-fp8/20260424-095953 --result-filename serve_in128_out128_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 128 --output-len 128 --num-prompts 10 --request-rate inf --ignore-eos
+  Throughput:  0.56 req/s | 71.2 out tok/s | 142.4 total tok/s
+  Prefill:     mean 6048.3 ms | P50 7911.6 ms | P99 12710.9 ms
+  Decode:      mean 47.1 ms/tok | P50 42.5 ms | P99 69.8 ms
+  E2E:         mean 12024.1 ms | P50 12391.9 ms | P99 17953.5 ms
+  Completed:   10 requests in 18.0s
+
+--- in=128 out=512 n=10 ---
+  Command: vllm bench serve --backend openai --base-url http://127.0.0.1:8080 --model Qwen3.6-27B-FP8 --endpoint /v1/completions --tokenizer Qwen/Qwen3.6-27B-FP8 --save-result --result-dir /home/bren/Code/vllm/bench-results/rocm/qwen3.6-27b-fp8/20260424-095953 --result-filename serve_in128_out512_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 128 --output-len 512 --num-prompts 10 --request-rate inf --ignore-eos
+  Throughput:  0.17 req/s | 84.9 out tok/s | 106.1 total tok/s
+  Prefill:     mean 18465.3 ms | P50 19568.2 ms | P99 43490.4 ms
+  Decode:      mean 43.5 ms/tok | P50 40.4 ms | P99 85.3 ms
+  E2E:         mean 40676.2 ms | P50 41812.4 ms | P99 60291.1 ms
+  Completed:   10 requests in 60.3s
+
+--- in=512 out=128 n=10 ---
+  Command: vllm bench serve --backend openai --base-url http://127.0.0.1:8080 --model Qwen3.6-27B-FP8 --endpoint /v1/completions --tokenizer Qwen/Qwen3.6-27B-FP8 --save-result --result-dir /home/bren/Code/vllm/bench-results/rocm/qwen3.6-27b-fp8/20260424-095953 --result-filename serve_in512_out128_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 512 --output-len 128 --num-prompts 10 --request-rate inf --ignore-eos
+  Throughput:  0.53 req/s | 68.1 out tok/s | 340.6 total tok/s
+  Prefill:     mean 5509.4 ms | P50 6208.1 ms | P99 13008.9 ms
+  Decode:      mean 49.0 ms/tok | P50 44.7 ms | P99 84.9 ms
+  E2E:         mean 11726.4 ms | P50 12276.1 ms | P99 18750.3 ms
+  Completed:   10 requests in 18.8s
+
+--- in=512 out=512 n=10 ---
+  Command: vllm bench serve --backend openai --base-url http://127.0.0.1:8080 --model Qwen3.6-27B-FP8 --endpoint /v1/completions --tokenizer Qwen/Qwen3.6-27B-FP8 --save-result --result-dir /home/bren/Code/vllm/bench-results/rocm/qwen3.6-27b-fp8/20260424-095953 --result-filename serve_in512_out512_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 512 --output-len 512 --num-prompts 10 --request-rate inf --ignore-eos
+  Throughput:  0.16 req/s | 83.8 out tok/s | 167.7 total tok/s
+  Prefill:     mean 16636.5 ms | P50 19686.7 ms | P99 40288.0 ms
+  Decode:      mean 39.6 ms/tok | P50 39.6 ms | P99 46.4 ms
+  E2E:         mean 36876.1 ms | P50 39371.5 ms | P99 60808.6 ms
+  Completed:   10 requests in 61.1s
+
+--- in=2048 out=128 n=10 ---
+  Command: vllm bench serve --backend openai --base-url http://127.0.0.1:8080 --model Qwen3.6-27B-FP8 --endpoint /v1/completions --tokenizer Qwen/Qwen3.6-27B-FP8 --save-result --result-dir /home/bren/Code/vllm/bench-results/rocm/qwen3.6-27b-fp8/20260424-095953 --result-filename serve_in2048_out128_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 2048 --output-len 128 --num-prompts 10 --request-rate inf --ignore-eos
+  Throughput:  0.32 req/s | 41.0 out tok/s | 697.2 total tok/s
+  Prefill:     mean 11584.2 ms | P50 12039.2 ms | P99 24706.9 ms
+  Decode:      mean 73.7 ms/tok | P50 66.6 ms | P99 109.4 ms
+  E2E:         mean 20939.1 ms | P50 22267.7 ms | P99 31078.2 ms
+  Completed:   10 requests in 31.2s
+
+--- in=2048 out=512 n=10 ---
+  Command: vllm bench serve --backend openai --base-url http://127.0.0.1:8080 --model Qwen3.6-27B-FP8 --endpoint /v1/completions --tokenizer Qwen/Qwen3.6-27B-FP8 --save-result --result-dir /home/bren/Code/vllm/bench-results/rocm/qwen3.6-27b-fp8/20260424-095953 --result-filename serve_in2048_out512_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 2048 --output-len 512 --num-prompts 10 --request-rate inf --ignore-eos
+  Throughput:  0.11 req/s | 58.2 out tok/s | 290.9 total tok/s
+  Prefill:     mean 26159.8 ms | P50 29053.9 ms | P99 63301.5 ms
+  Decode:      mean 55.6 ms/tok | P50 54.0 ms | P99 66.8 ms
+  E2E:         mean 54560.5 ms | P50 59241.1 ms | P99 87696.4 ms
+  Completed:   10 requests in 88.0s
+
+================================================================
+Benchmark complete: 2026-04-24T10:08:00+01:00
+Results saved to:   /home/bren/Code/vllm/bench-results/rocm/qwen3.6-27b-fp8/20260424-095953/
+Summary:            /home/bren/Code/vllm/bench-results/rocm/qwen3.6-27b-fp8/20260424-095953/summary.txt
+================================================================

@@ -1,0 +1,27 @@
+# Qwen3.5-35B-A3B (AWQ 4-bit) — hybrid DeltaNet/attention MoE, 3B active
+# Usage: ./run-vllm.sh configs/qwen3.5-35b-a3b-awq.yaml
+# Note: AWQ requires float16; thinking mode is on by default
+
+model: cyankiwi/Qwen3.5-35B-A3B-AWQ-4bit
+served-model-name: Qwen3.5-35B-A3B
+# max-model-len: 262144
+max-model-len: 131072
+max-num-seqs: 6
+gpu-memory-utilization: 0.99
+quantization: compressed-tensors
+dtype: float16
+kv-cache-dtype: fp8
+swap-space: 8
+tensor-parallel-size: 1
+trust-remote-code: true
+enforce-eager: true
+language-model-only: true
+reasoning-parser: qwen3
+override-generation-config:
+  temperature: 0.6
+  top_p: 0.95
+  top_k: 20
+enable-auto-tool-choice: true
+tool-call-parser: qwen3_coder
+host: "127.0.0.1"
+port: 8080

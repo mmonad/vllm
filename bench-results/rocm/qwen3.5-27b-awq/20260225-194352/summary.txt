@@ -1,0 +1,99 @@
+================================================================
+vLLM Benchmark Results
+================================================================
+Config:    configs/qwen3.5-27b-awq.yaml
+Name:      qwen3.5-27b-awq
+Date:      2026-02-25T19:43:52+00:00
+Git SHA:   d00a65a92
+Server:    http://127.0.0.1:8080
+Model:     Qwen3.5-27B
+GPU:       		AMD Radeon AI PRO R9700
+ROCm:      7.2.0
+
+--- Config Contents ---
+# Qwen3.5-27B (AWQ 4-bit) — hybrid DeltaNet+Attention dense model
+# Usage: ./run-vllm.sh configs/qwen3.5-27b-awq.yaml
+# Note: AWQ requires float16; thinking mode is on by default
+
+model: cyankiwi/Qwen3.5-27B-AWQ-BF16-INT4
+served-model-name: Qwen3.5-27B
+# max-model-len: 262144
+max-model-len: 16384
+max-num-seqs: 1
+gpu-memory-utilization: 0.99
+quantization: compressed-tensors
+dtype: float16
+kv-cache-dtype: fp8
+swap-space: 8
+tensor-parallel-size: 1
+trust-remote-code: true
+enforce-eager: true
+language-model-only: true
+reasoning-parser: qwen3
+override-generation-config:
+  temperature: 0.6
+  top_p: 0.95
+  top_k: 20
+  min_p: 0.0
+enable-auto-tool-choice: true
+tool-call-parser: qwen3_coder
+host: "127.0.0.1"
+port: 8080
+--- End Config ---
+================================================================
+
+================ BENCHMARKS ========================
+
+--- in=128 out=128 n=50 ---
+  Command: vllm bench serve --backend openai --base-url http://127.0.0.1:8080 --model Qwen3.5-27B --endpoint /v1/completions --tokenizer cyankiwi/Qwen3.5-27B-AWQ-BF16-INT4 --save-result --result-dir /home/bren/Code/vllm/bench-results/qwen3.5-27b-awq/20260225-194352 --result-filename serve_in128_out128_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 128 --output-len 128 --num-prompts 50 --request-rate inf --ignore-eos
+  Throughput:  0.13 req/s | 17.0 out tok/s | 33.9 total tok/s
+  Prefill:     mean 185605.1 ms | P50 185608.6 ms | P99 366917.3 ms
+  Decode:      mean 54.6 ms/tok | P50 54.5 ms | P99 54.7 ms
+  E2E:         mean 192533.1 ms | P50 192535.6 ms | P99 373842.7 ms
+  Completed:   50 requests in 377.5s
+
+--- in=128 out=512 n=50 ---
+  Command: vllm bench serve --backend openai --base-url http://127.0.0.1:8080 --model Qwen3.5-27B --endpoint /v1/completions --tokenizer cyankiwi/Qwen3.5-27B-AWQ-BF16-INT4 --save-result --result-dir /home/bren/Code/vllm/bench-results/qwen3.5-27b-awq/20260225-194352 --result-filename serve_in128_out512_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 128 --output-len 512 --num-prompts 50 --request-rate inf --ignore-eos
+  Throughput:  0.04 req/s | 20.1 out tok/s | 25.1 total tok/s
+  Prefill:     mean 652975.5 ms | P50 671261.9 ms | P99 1238183.9 ms
+  Decode:      mean 48.6 ms/tok | P50 45.0 ms | P99 54.7 ms
+  E2E:         mean 677815.6 ms | P50 694264.1 ms | P99 1261186.0 ms
+  Completed:   50 requests in 1272.8s
+
+--- in=512 out=128 n=50 ---
+  Command: vllm bench serve --backend openai --base-url http://127.0.0.1:8080 --model Qwen3.5-27B --endpoint /v1/completions --tokenizer cyankiwi/Qwen3.5-27B-AWQ-BF16-INT4 --save-result --result-dir /home/bren/Code/vllm/bench-results/qwen3.5-27b-awq/20260225-194352 --result-filename serve_in512_out128_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 512 --output-len 128 --num-prompts 50 --request-rate inf --ignore-eos
+  Throughput:  0.13 req/s | 16.4 out tok/s | 82.1 total tok/s
+  Prefill:     mean 192960.6 ms | P50 192965.0 ms | P99 380010.5 ms
+  Decode:      mean 45.1 ms/tok | P50 45.1 ms | P99 45.1 ms
+  E2E:         mean 198688.6 ms | P50 198693.1 ms | P99 385738.1 ms
+  Completed:   50 requests in 389.6s
+
+--- in=512 out=512 n=50 ---
+  Command: vllm bench serve --backend openai --base-url http://127.0.0.1:8080 --model Qwen3.5-27B --endpoint /v1/completions --tokenizer cyankiwi/Qwen3.5-27B-AWQ-BF16-INT4 --save-result --result-dir /home/bren/Code/vllm/bench-results/qwen3.5-27b-awq/20260225-194352 --result-filename serve_in512_out512_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 512 --output-len 512 --num-prompts 50 --request-rate inf --ignore-eos
+  Throughput:  0.04 req/s | 20.4 out tok/s | 40.8 total tok/s
+  Prefill:     mean 617539.0 ms | P50 617513.7 ms | P99 1220699.0 ms
+  Decode:      mean 45.1 ms/tok | P50 45.1 ms | P99 45.1 ms
+  E2E:         mean 640592.8 ms | P50 640566.9 ms | P99 1243754.9 ms
+  Completed:   50 requests in 1256.1s
+
+--- in=2048 out=128 n=50 ---
+  Command: vllm bench serve --backend openai --base-url http://127.0.0.1:8080 --model Qwen3.5-27B --endpoint /v1/completions --tokenizer cyankiwi/Qwen3.5-27B-AWQ-BF16-INT4 --save-result --result-dir /home/bren/Code/vllm/bench-results/qwen3.5-27b-awq/20260225-194352 --result-filename serve_in2048_out128_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 2048 --output-len 128 --num-prompts 50 --request-rate inf --ignore-eos
+  Throughput:  0.07 req/s | 9.2 out tok/s | 156.7 total tok/s
+  Prefill:     mean 348467.4 ms | P50 348473.3 ms | P99 681947.1 ms
+  Decode:      mean 45.5 ms/tok | P50 45.5 ms | P99 45.5 ms
+  E2E:         mean 354245.0 ms | P50 354251.0 ms | P99 687724.8 ms
+  Completed:   50 requests in 694.5s
+
+--- in=2048 out=512 n=50 ---
+  Command: vllm bench serve --backend openai --base-url http://127.0.0.1:8080 --model Qwen3.5-27B --endpoint /v1/completions --tokenizer cyankiwi/Qwen3.5-27B-AWQ-BF16-INT4 --save-result --result-dir /home/bren/Code/vllm/bench-results/qwen3.5-27b-awq/20260225-194352 --result-filename serve_in2048_out512_rateinf.json --num-warmups 2 --percentile-metrics ttft,tpot,itl,e2el --metric-percentiles 50,90,99 --trust-remote-code --dataset-name random --input-len 2048 --output-len 512 --num-prompts 50 --request-rate inf --ignore-eos
+  Throughput:  0.03 req/s | 16.3 out tok/s | 81.6 total tok/s
+  Prefill:     mean 776612.5 ms | P50 776590.6 ms | P99 1529736.2 ms
+  Decode:      mean 45.5 ms/tok | P50 45.5 ms | P99 45.5 ms
+  E2E:         mean 799865.1 ms | P50 799847.3 ms | P99 1552988.7 ms
+  Completed:   50 requests in 1568.4s
+
+================================================================
+Benchmark complete: 2026-02-25T21:21:24+00:00
+Results saved to:   /home/bren/Code/vllm/bench-results/qwen3.5-27b-awq/20260225-194352/
+Summary:            /home/bren/Code/vllm/bench-results/qwen3.5-27b-awq/20260225-194352/summary.txt
+================================================================

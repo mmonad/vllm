@@ -1,0 +1,14 @@
+# Qwen3.5-122B-A10B-INT4-Autoround — remote server on spark2
+# Launched via spark-vllm-docker recipe with:
+#   ./run-recipe.sh qwen3.5-122b-int4-autoround --setup --solo --port 8080 \
+#     --gpu-memory-utilization 0.9 --kv-cache-dtype fp8
+#
+# Effective: tp=1, gpu-mem=0.9, max-model-len=262144, prefix-caching enabled
+
+model: Intel/Qwen3.5-122B-A10B-int4-AutoRound
+served-model-name: Intel/Qwen3.5-122B-A10B-int4-AutoRound
+host: spark2
+port: 8080
+trust-remote-code: true
+kv-cache-dtype: fp8
+reasoning-parser: qwen3
