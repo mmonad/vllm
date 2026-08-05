@@ -133,11 +133,12 @@ def test_paged_attention(
     seed: int,
     device: str,
 ) -> None:
-    if current_platform.is_navi() and (
-        kv_cache_dtype == "fp8" or head_size != 128 or block_size != 16 or use_alibi
-    ):
-        pytest.skip()
-
+    if current_platform.is_navi():
+        fp8_unsupported = (
+            kv_cache_dtype == "fp8" and not current_platform.supports_fp8()
+        )
+        if fp8_unsupported or head_size != 128 or block_size != 16 or use_alibi:
+            pytest.skip()
     set_random_seed(seed)
     torch.set_default_device(device)
     scale = float(1.0 / (head_size**0.5))
