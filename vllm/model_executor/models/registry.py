@@ -206,6 +206,7 @@ _TEXT_GENERATION_MODELS = {
     "StableLMEpochForCausalLM": ("stablelm", "StablelmForCausalLM"),
     "StableLmForCausalLM": ("stablelm", "StablelmForCausalLM"),
     "SolarForCausalLM": ("solar", "SolarForCausalLM"),
+    "TalkieForCausalLM": ("talkie", "TalkieForCausalLM"),
     "TeleChat2ForCausalLM": ("telechat2", "TeleChat2ForCausalLM"),
     "TeleChat3ForCausalLM": ("llama", "LlamaForCausalLM"),
     "TeleFLMForCausalLM": ("teleflm", "TeleFLMForCausalLM"),
@@ -1429,10 +1430,11 @@ ModelRegistry = _ModelRegistry(
     }
 )
 
+
 _T = TypeVar("_T")
 
 
-def _run_in_subprocess(fn: Callable[[], _T]) -> _T:
+def _run_in_subprocess(fn: Callable[[], _T]) -> _T:  # noqa: UP047
     # NOTE: We use a temporary directory instead of a temporary file to avoid
     # issues like https://stackoverflow.com/questions/23212435/permission-denied-to-write-to-my-temporary-file
     with tempfile.TemporaryDirectory() as tempdir:

@@ -1,0 +1,17 @@
+# Talkie 1930 13B (instruction-tuned) — custom decoder-only LM
+# Usage: ./run-vllm.sh configs/rocm/talkie-1930-13b-it.yaml
+# Hardware: 1× 32GB RDNA4 (gfx1201, R9700) — bf16 weights (~25 GiB)
+#
+# Architecture is a small custom decoder-only LM (40L, 40H, head_dim 128, 5120
+# hidden, 13696 inter, 2048 ctx, full MHA). Implemented in
+# vllm/model_executor/models/talkie.py — Talkie's RoPE rotates by -θ (sign of
+# sin flipped vs NeoX), so RoPE is applied inline in the model file.
+
+model: lewtun/talkie-1930-13b-it-hf
+served-model-name: lewtun/talkie-1930-13b-it-hf
+max-model-len: 2048
+gpu-memory-utilization: 0.95
+dtype: bfloat16
+tensor-parallel-size: 1
+trust-remote-code: true
+generation-config: auto

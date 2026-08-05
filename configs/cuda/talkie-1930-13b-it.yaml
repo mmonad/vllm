@@ -1,0 +1,12 @@
+# Talkie 1930 13B (instruction-tuned) — custom decoder-only LM
+# Usage: ./run-vllm.sh configs/cuda/talkie-1930-13b-it.yaml
+# Hardware: RTX Pro 6000 (96GB) — bf16 weights (~25 GiB)
+
+model: lewtun/talkie-1930-13b-it-hf
+served-model-name: lewtun/talkie-1930-13b-it-hf
+max-model-len: 2048
+gpu-memory-utilization: 0.5
+dtype: bfloat16
+tensor-parallel-size: 1
+trust-remote-code: true
+generation-config: auto
